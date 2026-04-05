@@ -51,12 +51,16 @@
     body.drawer-open #side-drawer { width: 25vw; }
 
     /* --- UI ELEMENTS --- */
-    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px; margin-bottom: 10px; }
-    .gold-btn { padding: 12px; border: none; border-radius: 10px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; width: 100%; cursor: pointer; }
+    input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px; margin-bottom: 8px; }
+    .gold-btn { padding: 10px; border: none; border-radius: 8px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; width: 100%; cursor: pointer; font-size: 11px; }
     
-    .song-item { display: flex; gap: 10px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; align-items: center; }
-    .song-item img { width: 50px; border-radius: 5px; }
-    .song-item h4 { margin: 0; font-size: 11px; flex: 1; color: #fcf6ba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-item { display: flex; gap: 8px; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 6px; align-items: center; }
+    .song-item img { width: 45px; border-radius: 4px; }
+    .song-item h4 { margin: 0; font-size: 10px; flex: 1; color: #fcf6ba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* QUEUE LIST STYLING */
+    .queue-container { margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+    .queue-item { padding: 6px 10px; background: rgba(212, 175, 55, 0.1); border-radius: 6px; margin-bottom: 4px; font-size: 10px; border-left: 2px solid #bf953f; display: flex; justify-content: space-between; }
 
     #score-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #touch-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
@@ -65,15 +69,15 @@
 <body>
 
 <div id="homepage">
-  <div class="hero-title"><h1>NZM PREMIUM VIDEOKE🎤</h1></div>
+  <div class="hero-title"><h1>NZM VIDEOKE🎤</h1></div>
   <div class="home-content">
     <div class="search-box">
       <input id="homeSearchInput" type="text" placeholder="Search Song or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
-      <button class="gold-btn" onclick="searchHome()">SEARCH</button>
+      <button class="gold-btn" onclick="searchHome()">FIND SONG</button>
       <div id="homeResults" style="margin-top: 15px; max-height: 250px; overflow-y: auto;"></div>
     </div>
     <div class="search-box">
-      <h3 style="margin:0 0 10px 0; font-size:14px; color:#fcf6ba;">QUEUE</h3>
+      <h3 style="margin:0 0 10px 0; font-size:13px; color:#fcf6ba;">UPCOMING SINGERS</h3>
       <div id="homeQueue"></div>
       <button class="gold-btn" onclick="playNextInQueue()" style="margin-top:10px; background:#222; color:#bf953f; border:1px solid #bf953f;">START PERFORMANCE</button>
     </div>
@@ -87,16 +91,23 @@
   </div>
   <div id="side-drawer">
     <div style="padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
-       <span style="font-size: 10px; font-weight: bold; color: #bf953f;">CONTROLS</span>
-       <button onclick="toggleDrawer()" style="background: #333; color: #fff; border: none; font-size: 9px; padding: 4px 8px; border-radius: 4px;">DONE</button>
+       <span style="font-size: 9px; font-weight: bold; color: #bf953f;">PERFORMANCE HUB</span>
+       <button onclick="toggleDrawer()" style="background: #333; color: #fff; border: none; font-size: 8px; padding: 4px 8px; border-radius: 4px;">DONE</button>
     </div>
     <div style="padding: 12px; flex: 1; overflow-y: auto;">
-      <small style="color:#888; font-size: 9px;">NOW SINGING</small>
-      <div id="stageNowPlaying" style="font-size:11px; color:#fcf6ba; margin-bottom: 12px;">-</div>
-      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:11px;">
-      <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 8px;">SEARCH</button>
-      <div id="stageResults" style="margin-top:12px;"></div>
-      <button onclick="exitToHome()" style="background:none; color:#444; width:100%; margin-top:15px; font-size:9px; border:none; text-decoration: underline;">EXIT STAGE</button>
+      <small style="color:#888; font-size: 8px;">NOW PLAYING</small>
+      <div id="stageNowPlaying" style="font-size:10px; color:#fcf6ba; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+      
+      <input id="stageSearchInput" type="text" placeholder="Add another song..." style="font-size:11px;">
+      <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 6px;">SEARCH</button>
+      <div id="stageResults" style="margin-top:10px;"></div>
+      
+      <div class="queue-container">
+        <h4 style="margin: 0 0 8px 0; font-size: 10px; color: #bf953f;">STAGE QUEUE</h4>
+        <div id="stageQueue"></div>
+      </div>
+
+      <button onclick="exitToHome()" style="background:none; color:#444; width:100%; margin-top:20px; font-size:9px; border:none; text-decoration: underline;">EXIT TO MENU</button>
     </div>
   </div>
 </div>
@@ -106,7 +117,7 @@
     <b style="font-size:12px;">SCORE</b>
     <div id="finalScore" style="font-size:70px; font-weight:900;">0</div>
   </div>
-  <button class="gold-btn" onclick="hideScore()" style="width:auto; padding: 10px 30px; border-radius: 20px; margin-top: 20px;">CONTINUE</button>
+  <button class="gold-btn" onclick="hideScore()" style="width:auto; padding: 10px 30px; border-radius: 20px; margin-top: 20px;">NEXT SINGER</button>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -178,17 +189,20 @@
       </div>`).join('');
   }
 
-  // UPDATED: No more prompt for singer name
   function addToQueue(vId, title) {
     queue.push({ vId, title: unescape(title) });
     updateQueueUI();
   }
 
   function updateQueueUI() {
-    document.getElementById('homeQueue').innerHTML = queue.map((i, idx) => `
-      <div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid #bf953f;">
-        <b>#${idx + 1}</b> ${i.title}
-      </div>`).join('') || '<p style="color:#444; font-size:10px; text-align:center;">Queue is empty</p>';
+    const queueHTML = queue.map((i, idx) => `
+      <div class="queue-item">
+        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>#${idx + 1}</b> ${i.title}</span>
+      </div>`).join('') || '<p style="color:#444; font-size:9px; text-align:center;">No upcoming songs</p>';
+    
+    // Sync both Queue containers
+    document.getElementById('homeQueue').innerHTML = queueHTML;
+    document.getElementById('stageQueue').innerHTML = queueHTML;
   }
 
   function playNextInQueue() {
