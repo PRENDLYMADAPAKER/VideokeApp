@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>NZM Platinum Videoke Pro</title>
+  <title>NZM PREMIUM Videoke</title>
   <style>
     :root {
       --platinum-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
@@ -15,44 +15,25 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; overflow: hidden; }
 
-    /* --- MOBILE FRIENDLY HOMEPAGE --- */
+    /* --- HOMEPAGE (Mobile Friendly Vertical List) --- */
     #homepage { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: var(--dark-bg); 
       background-image: radial-gradient(circle at 50% 10%, #1a1a1a 0%, #050505 100%);
       display: flex; flex-direction: column; 
-      padding: 15px; /* Reduced padding for mobile */
-      overflow-y: auto; /* Allow scrolling on home if queue is long */
+      padding: 15px; 
+      overflow-y: auto;
       transition: transform 0.5s ease-in-out;
       z-index: 10;
     }
 
     .hero-title { text-align: center; margin: 10px 0 20px 0; }
-    .hero-title h1 { 
-      background: var(--platinum-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-      font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px;
-    }
-    .hero-title p { font-size: 10px; color: #888; margin-top: 5px; }
+    .hero-title h1 { background: var(--platinum-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; font-weight: 900; margin: 0; }
     
-    /* Responsive Grid: Stacks on mobile, side-by-side on tablets/PC */
-    .home-grid { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 15px; 
-      width: 100%; 
-      max-width: 500px; /* Centered narrow column for phones */
-      margin: 0 auto; 
-    }
+    .home-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px; margin: 0 auto; }
+    .search-box { background: var(--panel-bg); border: var(--glass-border); border-radius: 15px; padding: 15px; }
 
-    .search-box { 
-      background: var(--panel-bg); 
-      border: var(--glass-border); 
-      border-radius: 15px; 
-      padding: 15px; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    /* --- STAGE VIEW --- */
+    /* --- PERFORMANCE STAGE (Landscape Optimized) --- */
     #stage-view { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
       transform: translateY(100%); z-index: 20; display: flex; background: #000;
@@ -62,68 +43,46 @@
     body.in-stage #homepage { transform: translateY(-100%); }
     body.in-stage #stage-view { transform: translateY(0); }
 
-    /* Stage UI Squeeze logic */
     #stage { flex: 1; height: 100%; position: relative; transition: flex 0.5s ease; }
-    body.drawer-open #stage { flex: 0.3; } /* Squeezes video for drawer */
     
-    #side-drawer { width: 0; height: 100%; background: #0a0a0a; border-left: var(--glass-border); transition: width 0.5s ease; overflow: hidden; display: flex; flex-direction: column; }
-    body.drawer-open #side-drawer { width: 70vw; padding: 15px; }
-
-    /* --- BUTTONS & INPUTS --- */
-    input { 
-      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; 
-      background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none;
+    /* VIDEO PLAYER DRAWER: Keeps video at 75% width, pushes panel to 25% */
+    body.drawer-open #stage { flex: 0.75; } 
+    
+    #side-drawer { 
+      width: 0; height: 100%; background: rgba(10, 10, 10, 0.98); 
+      border-left: var(--glass-border); transition: width 0.5s ease; 
+      overflow: hidden; display: flex; flex-direction: column; 
     }
-    input:focus { border-color: #bf953f; }
+    body.drawer-open #side-drawer { width: 25vw; } /* Narrower drawer for video player */
 
-    .gold-btn { 
-      padding: 12px; border: none; border-radius: 10px; background: var(--platinum-gold); 
-      color: #000; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px;
-      width: 100%; margin-top: 10px;
-    }
-
-    .song-item { 
-      display: flex; gap: 10px; padding: 10px; background: rgba(255,255,255,0.03); 
-      border-radius: 10px; margin-bottom: 8px; align-items: center; border: 1px solid rgba(255,255,255,0.05);
-    }
-    .song-item img { width: 60px; border-radius: 5px; }
-    .song-item h4 { margin: 0; font-size: 11px; flex: 1; color: #fcf6ba; overflow: hidden; text-overflow: ellipsis; }
+    /* --- UI ELEMENTS --- */
+    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px; margin-bottom: 10px; }
+    .gold-btn { padding: 12px; border: none; border-radius: 10px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; width: 100%; cursor: pointer; }
+    
+    .song-item { display: flex; gap: 10px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; align-items: center; }
+    .song-item img { width: 50px; border-radius: 5px; }
+    .song-item h4 { margin: 0; font-size: 11px; flex: 1; color: #fcf6ba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     #score-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #touch-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
-
-    /* Desktop/Tablet adjustments */
-    @media (min-width: 800px) {
-      .home-grid { flex-direction: row; max-width: 1200px; align-items: flex-start; }
-      .hero-title h1 { font-size: 40px; }
-      body.drawer-open #side-drawer { width: 30vw; }
-      body.drawer-open #stage { flex: 0.7; }
-    }
   </style>
 </head>
 <body>
 
 <div id="homepage">
   <div class="hero-title">
-    <h1>PLATINUM PRO</h1>
-    <p>SELECT YOUR TRACK & GET READY TO SING</p>
+    <h1>NZM VIDEOKE</h1>
   </div>
-
-  <div class="home-grid">
+  <div class="home-content">
     <div class="search-box">
-      <input id="homeSearchInput" type="text" placeholder="Search Title or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
-      <button class="gold-btn" onclick="searchHome()">FIND SONG</button>
-      
-      <div id="homeResults" style="margin-top: 15px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
-        </div>
+      <input id="homeSearchInput" type="text" placeholder="Search Song or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
+      <button class="gold-btn" onclick="searchHome()">SEARCH</button>
+      <div id="homeResults" style="margin-top: 15px; max-height: 250px; overflow-y: auto;"></div>
     </div>
-
     <div class="search-box">
-      <h3 style="margin:0 0 10px 0; font-size:14px; color:#fcf6ba; border-bottom:1px solid #333; padding-bottom:5px;">SINGING NEXT</h3>
-      <div id="homeQueue" style="min-height: 50px;">
-        <p style="color:#444; font-size:11px; text-align:center;">Queue is empty</p>
-      </div>
-      <button class="gold-btn" onclick="playNextInQueue()" style="background: #222; color: #bf953f; border: 1px solid #bf953f;">START PERFORMANCE</button>
+      <h3 style="margin:0 0 10px 0; font-size:14px; color:#fcf6ba;">QUEUE</h3>
+      <div id="homeQueue"></div>
+      <button class="gold-btn" onclick="playNextInQueue()" style="margin-top:10px; background:#222; color:#bf953f; border:1px solid #bf953f;">START PERFORMANCE</button>
     </div>
   </div>
 </div>
@@ -133,32 +92,28 @@
     <div id="touch-overlay" onclick="toggleDrawer()"></div>
     <div id="player" style="width:100%; height:100%;"></div>
   </div>
-
   <div id="side-drawer">
     <div style="padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
-       <span style="font-size: 12px; font-weight: bold; color: #bf953f;">CONTROLS</span>
-       <button onclick="toggleDrawer()" style="background: #333; color: #fff; border: none; font-size: 10px; padding: 5px 10px; border-radius: 5px;">DONE</button>
+       <span style="font-size: 10px; font-weight: bold; color: #bf953f;">CONTROLS</span>
+       <button onclick="toggleDrawer()" style="background: #333; color: #fff; border: none; font-size: 9px; padding: 4px 8px; border-radius: 4px;">DONE</button>
     </div>
-    <div style="padding: 15px; flex: 1; overflow-y: auto;">
-      <small style="color:#888; font-size: 10px;">NOW SINGING</small>
-      <div id="stageNowPlaying" style="font-size:12px; color:#fcf6ba; margin-bottom: 15px;">-</div>
-      
-      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:12px;">
-      <button class="gold-btn" onclick="searchStage()" style="font-size:10px; padding: 8px;">SEARCH</button>
-      <div id="stageResults" style="margin-top:15px;"></div>
-      
-      <button onclick="exitToHome()" style="background:none; color:#666; width:100%; margin-top:20px; font-size:10px; border:none; text-decoration: underline;">EXIT STAGE</button>
+    <div style="padding: 12px; flex: 1; overflow-y: auto;">
+      <small style="color:#888; font-size: 9px;">NOW SINGING</small>
+      <div id="stageNowPlaying" style="font-size:11px; color:#fcf6ba; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:11px; padding: 8px;">
+      <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 8px;">SEARCH</button>
+      <div id="stageResults" style="margin-top:12px;"></div>
+      <button onclick="exitToHome()" style="background:none; color:#444; width:100%; margin-top:15px; font-size:9px; border:none; text-decoration: underline;">EXIT STAGE</button>
     </div>
   </div>
 </div>
 
 <div id="score-screen">
-  <h1 style="color: #bf953f; font-size: 40px; margin: 0;">FANTASTIC!</h1>
-  <div style="width:180px; height:180px; border-radius:50%; background:var(--platinum-gold); color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; margin: 20px 0; box-shadow: 0 0 40px rgba(191,149,63,0.5);">
+  <div style="width:180px; height:180px; border-radius:50%; background:var(--platinum-gold); color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 0 40px rgba(191,149,63,0.5);">
     <b style="font-size:12px;">SCORE</b>
     <div id="finalScore" style="font-size:70px; font-weight:900;">0</div>
   </div>
-  <button class="gold-btn" onclick="hideScore()" style="width:auto; padding: 12px 40px; border-radius: 30px;">CONTINUE</button>
+  <button class="gold-btn" onclick="hideScore()" style="width:auto; padding: 10px 30px; border-radius: 20px; margin-top: 20px;">CONTINUE</button>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -220,11 +175,11 @@
     el.innerHTML = items.map(item => `
       <div class="song-item">
         <img src="${item.snippet.thumbnails.default.url}">
-        <div style="flex:1">
+        <div style="flex:1; overflow:hidden;">
           <h4>${item.snippet.title}</h4>
           <div style="display:flex; gap:5px; margin-top:5px;">
-            <button onclick="enterStage('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:4px 8px; background:var(--platinum-gold); border:none; border-radius:5px;">PLAY</button>
-            <button onclick="addToQueue('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:4px 8px; background:#333; color:#fff; border:none; border-radius:5px;">+Q</button>
+            <button onclick="enterStage('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:8px; padding:3px 6px; background:var(--platinum-gold); border:none; border-radius:4px;">PLAY</button>
+            <button onclick="addToQueue('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:8px; padding:3px 6px; background:#333; color:#fff; border:none; border-radius:4px;">+Q</button>
           </div>
         </div>
       </div>`).join('');
@@ -242,7 +197,7 @@
     document.getElementById('homeQueue').innerHTML = queue.map(i => `
       <div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid #bf953f;">
         <b>${i.name}</b>: ${i.title}
-      </div>`).join('') || '<p style="color:#444; font-size:11px; text-align:center;">Queue is empty</p>';
+      </div>`).join('') || '<p style="color:#444; font-size:10px; text-align:center;">Queue is empty</p>';
   }
 
   function playNextInQueue() {
@@ -265,4 +220,4 @@
   }
 </script>
 </body>
-  </html>
+</html>
