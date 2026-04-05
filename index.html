@@ -18,25 +18,26 @@
       margin: 0; padding: 0;
       width: 100vw; height: 100vh;
       background: #000;
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden; /* Lock screen for landscape feel */
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden; /* Prevents accidental scrolling of the main stage */
+      color: #fff;
     }
 
-    /* THE MAIN VIEWPORT - SIDE BY SIDE */
+    /* MAIN WRAPPER - Side by Side Layout */
     #main-wrapper {
       display: flex;
       width: 100vw;
       height: 100vh;
-      transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+      overflow: hidden;
     }
 
-    /* THE VIDEO STAGE */
+    /* LEFT SIDE: THE VIDEO STAGE */
     #stage {
-      flex: 1; /* Takes full width by default */
+      flex: 1; /* Default: Takes full width */
       height: 100%;
       background: #000;
       position: relative;
-      transition: flex 0.5s ease;
+      transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* When drawer is open, stage shrinks to half */
@@ -46,6 +47,7 @@
 
     #player-wrapper { width: 100%; height: 100%; pointer-events: none; }
 
+    /* Invisible layer to detect touches to open drawer */
     #touch-overlay {
       position: absolute;
       top: 0; left: 0;
@@ -54,26 +56,33 @@
       cursor: pointer;
     }
 
-    /* THE RIGHT SIDE DRAWER */
+    /* RIGHT SIDE: THE SCROLLABLE DRAWER */
     #side-drawer {
-      width: 0; /* Hidden by default */
+      width: 0; /* Starts hidden */
       height: 100%;
       background: var(--drawer-bg);
       border-left: var(--glass-border);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
-      transition: width 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    body.drawer-open #side-drawer {
+      width: 50vw; /* Takes 50% of the screen */
+    }
+
+    /* Container inside drawer that handles scrolling */
+    .drawer-content {
+      min-width: 45vw; /* Prevents squishing during transition */
+      height: 100%;
+      padding: 20px;
+      overflow-y: auto; /* Makes search and queue scrollable */
       display: flex;
       flex-direction: column;
     }
 
-    body.drawer-open #side-drawer {
-      width: 50vw; /* Takes the other half */
-      padding: 20px;
-    }
-
-    /* UI ELEMENTS */
-    .drawer-content { min-width: 40vw; } /* Keeps content from squishing during animation */
-
+    /* PLATINUM UI STYLES */
     .panel {
       background: rgba(255,255,255,0.05);
       border: var(--glass-border);
@@ -83,7 +92,7 @@
     }
 
     input {
-      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #444;
+      width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #444;
       background: #000; color: #fff; margin-bottom: 10px; font-size: 16px;
     }
 
@@ -91,30 +100,41 @@
       padding: 12px 20px; border: none; border-radius: 10px;
       background: var(--platinum-gold); color: #000;
       font-weight: bold; text-transform: uppercase; cursor: pointer;
+      transition: transform 0.1s;
     }
+    button:active { transform: scale(0.95); }
 
-    .results-list { flex: 1; overflow-y: auto; margin: 10px 0; }
+    .results-container { flex: 1; margin: 10px 0; }
 
     .song-item {
-      display: flex; gap: 10px; padding: 10px; background: rgba(0,0,0,0.3);
-      border-radius: 10px; margin-bottom: 8px; align-items: center;
+      display: flex; gap: 12px; padding: 10px; background: rgba(255,255,255,0.03);
+      border-radius: 12px; margin-bottom: 10px; align-items: center;
       border: 1px solid transparent;
     }
-    .song-item:hover { border-color: #bf953f; }
-    .song-item img { width: 70px; border-radius: 5px; }
+    .song-item:hover { border-color: rgba(212, 175, 55, 0.5); }
+    .song-item img { width: 80px; border-radius: 8px; }
+    .song-item h4 { margin: 0; font-size: 14px; flex: 1; color: #fcf6ba; }
 
-    /* SCORE SYSTEM */
+    /* SCORE OVERLAY */
     #score-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95); z-index: 100;
+      background: rgba(0,0,0,0.98); z-index: 100;
       display: none; flex-direction: column; align-items: center; justify-content: center;
     }
 
     .score-circle {
-      width: 200px; height: 200px; border-radius: 50%;
+      width: 220px; height: 220px; border-radius: 50%;
       background: var(--platinum-gold); color: #000;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 0 40px #bf953f;
+      box-shadow: 0 0 50px #bf953f; margin: 20px;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+
+    @media (max-width: 600px) {
+      body.drawer-open #side-drawer { width: 90vw; }
+      .drawer-content { min-width: 85vw; }
     }
   </style>
 </head>
@@ -128,45 +148,48 @@
 
   <div id="side-drawer">
     <div class="drawer-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="margin:0; background:var(--platinum-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">PLATINUM PRO</h2>
-        <button onclick="toggleDrawer()" style="background:#333; color:#fff; font-size:10px;">DONE</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; background:var(--platinum-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:900;">PLATINUM PRO</h2>
+        <button onclick="toggleDrawer()" style="background:#333; color:#fff; font-size:10px;">CLOSE [X]</button>
       </div>
 
       <div class="panel">
-        <div id="nowPlayingTitle" style="font-weight:bold; color:#bf953f;">Waiting for song...</div>
-        <small style="color:#666; text-transform:uppercase;">Now Performing</small>
+        <small style="color:#888; text-transform:uppercase; letter-spacing:1px;">Now Singing</small>
+        <div id="nowPlayingTitle" style="font-weight:bold; color:#bf953f; font-size:18px; margin-top:5px;">Select a Song</div>
       </div>
 
       <div class="panel">
-        <input id="searchInput" type="text" placeholder="Search Title or Artist..." />
-        <button onclick="searchVideos()" style="width:100%">FIND KARAOKE</button>
+        <input id="searchInput" type="text" placeholder="Search Title or Artist..." onkeypress="handleKey(event)"/>
+        <button onclick="searchVideos()" style="width:100%">SEARCH LIBRARY</button>
       </div>
 
-      <div class="results-list" id="results"></div>
+      <div class="results-container" id="results">
+        </div>
 
-      <h3 style="color:#fcf6ba; font-size:14px; margin:10px 0;">UPCOMING SINGER QUEUE</h3>
-      <div id="queue-list" style="max-height:150px; overflow-y:auto;"></div>
+      <h3 style="color:#fcf6ba; font-size:16px; border-bottom:1px solid #333; padding-bottom:10px;">UPCOMING SINGERS</h3>
+      <div id="queue-list" style="margin-bottom:20px;"></div>
       
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button onclick="playNextInQueue()" style="flex:1; font-size:11px;">PLAY NEXT</button>
-        <button onclick="clearQueue()" style="flex:1; font-size:11px; background:#222; color:#fff;">RESET</button>
+      <div style="display:flex; gap:10px; padding-bottom:20px;">
+        <button onclick="playNextInQueue()" style="flex:1; font-size:12px;">PLAY NEXT</button>
+        <button onclick="clearQueue()" style="flex:1; font-size:12px; background:#222; color:#fff;">CLEAR ALL</button>
       </div>
     </div>
   </div>
 </div>
 
 <div id="score-screen">
-  <h1 style="color: #bf953f; letter-spacing:4px;">EXCELLENT!</h1>
+  <h1 style="color: #bf953f; letter-spacing:5px; font-size:40px;">FANTASTIC!</h1>
   <div class="score-circle">
-    <div style="font-weight:bold;">SCORE</div>
-    <div id="finalScore" style="font-size:70px; font-weight:900;">0</div>
+    <div style="font-weight:bold; letter-spacing:2px;">RATING</div>
+    <div id="finalScore" style="font-size:90px; font-weight:900;">0</div>
   </div>
-  <button onclick="hideScore()" style="margin-top:20px; padding:15px 40px; border-radius:30px;">NEXT SINGER</button>
+  <h2 id="ratingText" style="color:#fcf6ba;">PROFESSIONAL!</h2>
+  <button onclick="hideScore()" style="margin-top:30px; padding:15px 60px; border-radius:40px; font-size:18px;">NEXT SINGER</button>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+  // Replace with your real API Key
   const API_KEY = 'AIzaSyBVcJ_KWBBTACy-FeeLAj8sE8ltNGTd8aQ'; 
   let player;
   let queue = [];
@@ -179,21 +202,36 @@
     });
   }
 
-  function toggleDrawer() {
-    document.body.classList.toggle('drawer-open');
+  // --- DRAWER & LANDSCAPE LOGIC ---
+  async function toggleDrawer() {
+    const isOpen = document.body.classList.toggle('drawer-open');
+    
+    // If we are closing the drawer to sing, try to force landscape fullscreen
+    if (!isOpen) {
+      try {
+        const doc = document.documentElement;
+        if (doc.requestFullscreen) await doc.requestFullscreen();
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+        }
+      } catch (err) { console.log("Orientation lock requires user gesture or browser support."); }
+    }
   }
 
+  function handleKey(e) { if(e.key === 'Enter') searchVideos(); }
+
+  // --- VIDEO SEARCH ---
   async function searchVideos() {
     const query = document.getElementById('searchInput').value;
     if (!query) return;
     const resEl = document.getElementById('results');
-    resEl.innerHTML = '<p style="color:#bf953f; text-align:center;">Browsing Library...</p>';
+    resEl.innerHTML = '<p style="color:#bf953f; text-align:center; padding:20px;">Searching Platinum Library...</p>';
 
     try {
-      const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + " karaoke")}&type=video&videoEmbeddable=true&maxResults=10&key=${API_KEY}`);
+      const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + " karaoke instrumental")}&type=video&videoEmbeddable=true&maxResults=12&key=${API_KEY}`);
       const data = await response.json();
       renderResults(data.items);
-    } catch (e) { resEl.innerHTML = '<p>Error.</p>'; }
+    } catch (e) { resEl.innerHTML = '<p>Search Error. Check API Key.</p>'; }
   }
 
   function renderResults(items) {
@@ -201,30 +239,37 @@
     resEl.innerHTML = '';
     items.forEach(item => {
       const vId = item.id.videoId;
-      const title = item.snippet.title;
+      const title = item.snippet.title.replace(/karaoke/gi, "").replace(/instrumental/gi, "");
       const div = document.createElement('div');
       div.className = 'song-item';
       div.innerHTML = `
         <img src="${item.snippet.thumbnails.default.url}">
         <div style="flex:1">
-          <h4 style="margin:0; font-size:13px;">${title}</h4>
-          <div style="display:flex; gap:5px; margin-top:8px;">
-            <button onclick="playNow('${vId}', '${escape(title)}')" style="font-size:10px; padding:5px;">PLAY</button>
-            <button onclick="addToQueue('${vId}', '${escape(title)}')" style="font-size:10px; padding:5px; background:#333; color:#fff;">+ QUEUE</button>
+          <h4 style="margin:0;">${title}</h4>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button onclick="playNow('${vId}', '${escape(title)}')" style="font-size:10px; padding:6px 12px;">PLAY NOW</button>
+            <button onclick="addToQueue('${vId}', '${escape(title)}')" style="font-size:10px; padding:6px 12px; background:#333; color:#fff;">+ QUEUE</button>
           </div>
         </div>`;
       resEl.appendChild(div);
     });
   }
 
+  // --- PLAYBACK & QUEUE ---
   function playNow(vId, title) {
     document.getElementById('nowPlayingTitle').textContent = unescape(title);
     player.loadVideoById(vId);
-    document.body.classList.remove('drawer-open'); // Video takes full screen back
+    document.body.classList.remove('drawer-open'); // Force video to take full screen
+    
+    // Attempt landscape lock again on direct play click
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(()=>{});
+        if(screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
+    }
   }
 
   function addToQueue(vId, title) {
-    const name = prompt("Singer Name:", "Guest");
+    const name = prompt("Enter Singer Name:", "Guest");
     if(name) {
       queue.push({ vId, title: unescape(title), name });
       updateQueueUI();
@@ -233,12 +278,27 @@
 
   function updateQueueUI() {
     const qEl = document.getElementById('queue-list');
-    qEl.innerHTML = queue.map(i => `<div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; border-left:3px solid #bf953f; font-size:11px;"><b style="color:#bf953f">${i.name}</b>: ${i.title}</div>`).join('');
+    if(queue.length === 0) {
+        qEl.innerHTML = '<p style="color:#555; font-size:12px;">No singers in line.</p>';
+        return;
+    }
+    qEl.innerHTML = queue.map((i, idx) => `
+      <div style="padding:12px; background:rgba(255,255,255,0.05); border-radius:10px; margin-bottom:8px; border-left:4px solid #bf953f; display:flex; justify-content:space-between; align-items:center;">
+        <div><b style="color:#bf953f">${i.name}</b><br><span style="font-size:12px;">${i.title}</span></div>
+        <small style="color:#444">#${idx+1}</small>
+      </div>`).join('');
   }
 
+  // --- SCORE GENERATOR ---
   function triggerScore() {
-    const score = Math.floor(Math.random() * 15) + 85;
+    // Generate random score between 82 and 100
+    const score = Math.floor(Math.random() * (100 - 82 + 1)) + 82;
     document.getElementById('finalScore').innerText = score;
+    
+    const ratings = ["GOOD!", "GREAT!", "PROFESSIONAL!", "WORLD CLASS!", "PLATINUM!"];
+    const rating = ratings[Math.floor(Math.random() * ratings.length)];
+    document.getElementById('ratingText').innerText = rating;
+    
     document.getElementById('score-screen').style.display = 'flex';
   }
 
@@ -252,11 +312,12 @@
       const next = queue.shift();
       updateQueueUI();
       playNow(next.vId, next.title);
+    } else {
+      document.body.classList.add('drawer-open'); // Open drawer if no one is next
     }
   }
 
   function clearQueue() { queue = []; updateQueueUI(); }
-  document.getElementById('searchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') searchVideos(); });
 </script>
 </body>
 </html>
