@@ -15,113 +15,156 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; overflow: hidden; }
 
-    /* --- VIEW SEPARATION --- */
-    .view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; transition: transform 0.5s ease-in-out; z-index: 1; }
-    #homepage { background: var(--dark-bg); background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%); display: flex; flex-direction: column; padding: 40px; overflow-y: auto; }
-    #stage-view { transform: translateY(100%); z-index: 2; display: flex; }
+    /* --- MOBILE FRIENDLY HOMEPAGE --- */
+    #homepage { 
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: var(--dark-bg); 
+      background-image: radial-gradient(circle at 50% 10%, #1a1a1a 0%, #050505 100%);
+      display: flex; flex-direction: column; 
+      padding: 15px; /* Reduced padding for mobile */
+      overflow-y: auto; /* Allow scrolling on home if queue is long */
+      transition: transform 0.5s ease-in-out;
+      z-index: 10;
+    }
+
+    .hero-title { text-align: center; margin: 10px 0 20px 0; }
+    .hero-title h1 { 
+      background: var(--platinum-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+      font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px;
+    }
+    .hero-title p { font-size: 10px; color: #888; margin-top: 5px; }
+    
+    /* Responsive Grid: Stacks on mobile, side-by-side on tablets/PC */
+    .home-grid { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 15px; 
+      width: 100%; 
+      max-width: 500px; /* Centered narrow column for phones */
+      margin: 0 auto; 
+    }
+
+    .search-box { 
+      background: var(--panel-bg); 
+      border: var(--glass-border); 
+      border-radius: 15px; 
+      padding: 15px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* --- STAGE VIEW --- */
+    #stage-view { 
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+      transform: translateY(100%); z-index: 20; display: flex; background: #000;
+      transition: transform 0.5s ease;
+    }
 
     body.in-stage #homepage { transform: translateY(-100%); }
     body.in-stage #stage-view { transform: translateY(0); }
 
-    /* --- HOMEPAGE STYLES --- */
-    .hero-title { text-align: center; margin-bottom: 30px; }
-    .hero-title h1 { background: var(--platinum-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 48px; font-weight: 900; margin: 0; }
+    /* Stage UI Squeeze logic */
+    #stage { flex: 1; height: 100%; position: relative; transition: flex 0.5s ease; }
+    body.drawer-open #stage { flex: 0.3; } /* Squeezes video for drawer */
     
-    .home-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1400px; margin: 0 auto; width: 100%; }
-    .search-box { background: var(--panel-bg); border: var(--glass-border); border-radius: 20px; padding: 25px; }
+    #side-drawer { width: 0; height: 100%; background: #0a0a0a; border-left: var(--glass-border); transition: width 0.5s ease; overflow: hidden; display: flex; flex-direction: column; }
+    body.drawer-open #side-drawer { width: 70vw; padding: 15px; }
 
-    /* --- STAGE & DRAWER STYLES --- */
-    #stage { flex: 1; height: 100%; position: relative; transition: flex 0.5s ease; background: #000; }
-    body.drawer-open #stage { flex: 0.75; }
-    
-    #side-drawer { width: 0; height: 100%; background: rgba(10,10,10,0.98); border-left: var(--glass-border); transition: width 0.5s ease; overflow: hidden; display: flex; flex-direction: column; }
-    body.drawer-open #side-drawer { width: 25vw; padding: 15px; }
+    /* --- BUTTONS & INPUTS --- */
+    input { 
+      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; 
+      background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none;
+    }
+    input:focus { border-color: #bf953f; }
 
-    /* --- SHARED UI --- */
-    .panel { background: rgba(255,255,255,0.05); border: var(--glass-border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #444; background: #000; color: #fff; font-size: 16px; margin-bottom: 10px; }
-    button { padding: 12px 25px; border: none; border-radius: 10px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-    button:active { transform: scale(0.95); }
-    
-    .song-item { display: flex; gap: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; align-items: center; }
-    .song-item img { width: 80px; border-radius: 8px; }
-    .song-item h4 { margin: 0; font-size: 14px; flex: 1; color: #fcf6ba; }
+    .gold-btn { 
+      padding: 12px; border: none; border-radius: 10px; background: var(--platinum-gold); 
+      color: #000; font-weight: bold; text-transform: uppercase; cursor: pointer; font-size: 12px;
+      width: 100%; margin-top: 10px;
+    }
 
-    /* --- SCORE --- */
-    #score-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-    .score-circle { width: 200px; height: 200px; border-radius: 50%; background: var(--platinum-gold); color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 50px #bf953f; }
+    .song-item { 
+      display: flex; gap: 10px; padding: 10px; background: rgba(255,255,255,0.03); 
+      border-radius: 10px; margin-bottom: 8px; align-items: center; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .song-item img { width: 60px; border-radius: 5px; }
+    .song-item h4 { margin: 0; font-size: 11px; flex: 1; color: #fcf6ba; overflow: hidden; text-overflow: ellipsis; }
 
-    #touch-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; cursor: pointer; }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    #score-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+    #touch-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+
+    /* Desktop/Tablet adjustments */
+    @media (min-width: 800px) {
+      .home-grid { flex-direction: row; max-width: 1200px; align-items: flex-start; }
+      .hero-title h1 { font-size: 40px; }
+      body.drawer-open #side-drawer { width: 30vw; }
+      body.drawer-open #stage { flex: 0.7; }
+    }
   </style>
 </head>
 <body>
 
-<div id="homepage" class="view">
+<div id="homepage">
   <div class="hero-title">
-    <h1>PLATINUM VIDEOKE PRO</h1>
-    <p style="color: #888; letter-spacing: 2px;">SELECT YOUR TRACK & GET READY TO SING</p>
+    <h1>PLATINUM PRO</h1>
+    <p>SELECT YOUR TRACK & GET READY TO SING</p>
   </div>
 
   <div class="home-grid">
     <div class="search-box">
-      <div style="display:flex; gap:10px;">
-        <input id="homeSearchInput" type="text" placeholder="Search Song Title or Artist..." onkeypress="if(e.key==='Enter') searchHome()">
-        <button onclick="searchHome()">SEARCH</button>
-      </div>
-      <div id="homeResults" style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <input id="homeSearchInput" type="text" placeholder="Search Title or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
+      <button class="gold-btn" onclick="searchHome()">FIND SONG</button>
+      
+      <div id="homeResults" style="margin-top: 15px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
         </div>
     </div>
 
     <div class="search-box">
-      <h3 style="margin-top:0; color:#fcf6ba; border-bottom:1px solid #333; padding-bottom:10px;">SINGING NEXT</h3>
-      <div id="homeQueue"></div>
-      <button onclick="playNextInQueue()" style="width:100%; margin-top:20px;">START PERFORMANCE</button>
+      <h3 style="margin:0 0 10px 0; font-size:14px; color:#fcf6ba; border-bottom:1px solid #333; padding-bottom:5px;">SINGING NEXT</h3>
+      <div id="homeQueue" style="min-height: 50px;">
+        <p style="color:#444; font-size:11px; text-align:center;">Queue is empty</p>
+      </div>
+      <button class="gold-btn" onclick="playNextInQueue()" style="background: #222; color: #bf953f; border: 1px solid #bf953f;">START PERFORMANCE</button>
     </div>
   </div>
 </div>
 
-<div id="stage-view" class="view">
+<div id="stage-view">
   <div id="stage">
     <div id="touch-overlay" onclick="toggleDrawer()"></div>
     <div id="player" style="width:100%; height:100%;"></div>
   </div>
 
   <div id="side-drawer">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #333;">
-      <span style="font-weight:bold; color:#bf953f;">STAGE CONTROL</span>
-      <button onclick="toggleDrawer()" style="font-size:9px; padding:5px 10px;">DONE</button>
+    <div style="padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+       <span style="font-size: 12px; font-weight: bold; color: #bf953f;">CONTROLS</span>
+       <button onclick="toggleDrawer()" style="background: #333; color: #fff; border: none; font-size: 10px; padding: 5px 10px; border-radius: 5px;">DONE</button>
     </div>
-    
-    <div class="panel">
-      <small style="color:#888;">NOW SINGING</small>
-      <div id="stageNowPlaying" style="font-size:13px; font-weight:bold; color:#fcf6ba;">-</div>
+    <div style="padding: 15px; flex: 1; overflow-y: auto;">
+      <small style="color:#888; font-size: 10px;">NOW SINGING</small>
+      <div id="stageNowPlaying" style="font-size:12px; color:#fcf6ba; margin-bottom: 15px;">-</div>
+      
+      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:12px;">
+      <button class="gold-btn" onclick="searchStage()" style="font-size:10px; padding: 8px;">SEARCH</button>
+      <div id="stageResults" style="margin-top:15px;"></div>
+      
+      <button onclick="exitToHome()" style="background:none; color:#666; width:100%; margin-top:20px; font-size:10px; border:none; text-decoration: underline;">EXIT STAGE</button>
     </div>
-
-    <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="padding:10px; font-size:13px;">
-    <button onclick="searchStage()" style="width:100%; font-size:11px;">SEARCH</button>
-    
-    <div id="stageResults" style="flex:1; overflow-y:auto; margin-top:10px;"></div>
-    
-    <button onclick="exitToHome()" style="background:#333; color:#fff; width:100%; margin-top:10px; font-size:10px;">EXIT TO HOME</button>
   </div>
 </div>
 
 <div id="score-screen">
-  <h1 style="color: #bf953f; font-size: 50px;">GREAT!</h1>
-  <div class="score-circle">
-    <div style="font-weight:bold;">RATING</div>
-    <div id="finalScore" style="font-size:80px; font-weight:900;">0</div>
+  <h1 style="color: #bf953f; font-size: 40px; margin: 0;">FANTASTIC!</h1>
+  <div style="width:180px; height:180px; border-radius:50%; background:var(--platinum-gold); color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; margin: 20px 0; box-shadow: 0 0 40px rgba(191,149,63,0.5);">
+    <b style="font-size:12px;">SCORE</b>
+    <div id="finalScore" style="font-size:70px; font-weight:900;">0</div>
   </div>
-  <button onclick="hideScore()" style="margin-top:30px; padding:15px 50px; border-radius:30px;">CONTINUE</button>
+  <button class="gold-btn" onclick="hideScore()" style="width:auto; padding: 12px 40px; border-radius: 30px;">CONTINUE</button>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   const API_KEY = 'AIzaSyBVcJ_KWBBTACy-FeeLAj8sE8ltNGTd8aQ'; 
-  let player;
-  let queue = [];
+  let player, queue = [];
 
   function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
@@ -131,16 +174,17 @@
     });
   }
 
-  // --- NAVIGATION ---
-  function enterStage(vId, title) {
+  function toggleDrawer() { document.body.classList.toggle('drawer-open'); }
+
+  async function enterStage(vId, title) {
     document.body.classList.add('in-stage');
     document.getElementById('stageNowPlaying').textContent = unescape(title);
     player.loadVideoById(vId);
-    
-    // Force Landscape Fullscreen
-    const doc = document.documentElement;
-    if (doc.requestFullscreen) doc.requestFullscreen().catch(()=>{});
-    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
+    try {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) await doc.requestFullscreen();
+      if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape');
+    } catch(e) {}
   }
 
   function exitToHome() {
@@ -150,46 +194,42 @@
     if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
   }
 
-  function toggleDrawer() { document.body.classList.toggle('drawer-open'); }
-
-  // --- SEARCH LOGIC ---
   async function searchHome() {
     const q = document.getElementById('homeSearchInput').value;
-    const data = await fetchYoutube(q);
-    renderResults(data, 'homeResults', true);
+    const items = await fetchYoutube(q);
+    renderResults(items, 'homeResults');
   }
 
   async function searchStage() {
     const q = document.getElementById('stageSearchInput').value;
-    const data = await fetchYoutube(q);
-    renderResults(data, 'stageResults', false);
+    const items = await fetchYoutube(q);
+    renderResults(items, 'stageResults');
   }
 
   async function fetchYoutube(q) {
     if(!q) return [];
     try {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + " karaoke")}&type=video&maxResults=10&key=${API_KEY}`);
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + " karaoke instrumental")}&type=video&maxResults=8&key=${API_KEY}`);
       const data = await res.json();
-      return data.items;
+      return data.items || [];
     } catch(e) { return []; }
   }
 
-  function renderResults(items, targetId, isHome) {
+  function renderResults(items, targetId) {
     const el = document.getElementById(targetId);
     el.innerHTML = items.map(item => `
       <div class="song-item">
         <img src="${item.snippet.thumbnails.default.url}">
         <div style="flex:1">
-          <h4 style="font-size:${isHome?'13px':'11px'}">${item.snippet.title.substring(0,40)}...</h4>
+          <h4>${item.snippet.title}</h4>
           <div style="display:flex; gap:5px; margin-top:5px;">
-            <button onclick="enterStage('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:5px;">PLAY</button>
-            <button onclick="addToQueue('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:5px; background:#333; color:#fff;">+Q</button>
+            <button onclick="enterStage('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:4px 8px; background:var(--platinum-gold); border:none; border-radius:5px;">PLAY</button>
+            <button onclick="addToQueue('${item.id.videoId}', '${escape(item.snippet.title)}')" style="font-size:9px; padding:4px 8px; background:#333; color:#fff; border:none; border-radius:5px;">+Q</button>
           </div>
         </div>
       </div>`).join('');
   }
 
-  // --- QUEUE & SCORE ---
   function addToQueue(vId, title) {
     const name = prompt("Singer Name:", "Guest");
     if(name) {
@@ -199,8 +239,10 @@
   }
 
   function updateQueueUI() {
-    const html = queue.map(i => `<div style="padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; font-size:12px; border-left:3px solid #bf953f;"><b>${i.name}</b>: ${i.title}</div>`).join('');
-    document.getElementById('homeQueue').innerHTML = html || '<p style="color:#555">Queue is empty</p>';
+    document.getElementById('homeQueue').innerHTML = queue.map(i => `
+      <div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid #bf953f;">
+        <b>${i.name}</b>: ${i.title}
+      </div>`).join('') || '<p style="color:#444; font-size:11px; text-align:center;">Queue is empty</p>';
   }
 
   function playNextInQueue() {
@@ -208,13 +250,11 @@
       const next = queue.shift();
       updateQueueUI();
       enterStage(next.vId, next.title);
-    } else {
-      alert("Please add a song to the queue first!");
     }
   }
 
   function triggerScore() {
-    document.getElementById('finalScore').innerText = Math.floor(Math.random() * 18) + 82;
+    document.getElementById('finalScore').innerText = Math.floor(Math.random() * 15) + 85;
     document.getElementById('score-screen').style.display = 'flex';
   }
 
@@ -225,4 +265,4 @@
   }
 </script>
 </body>
-</html>
+  </html>
