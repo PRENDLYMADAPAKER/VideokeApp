@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>NZM PREMIUM Videoke</title>
+  <title>NZM Premium Videoke</title>
   <style>
     :root {
       --platinum-gold: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
@@ -15,16 +15,13 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #000; font-family: 'Segoe UI', sans-serif; color: #fff; overflow: hidden; }
 
-    /* --- HOMEPAGE (Mobile Friendly Vertical List) --- */
+    /* --- HOMEPAGE --- */
     #homepage { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: var(--dark-bg); 
       background-image: radial-gradient(circle at 50% 10%, #1a1a1a 0%, #050505 100%);
-      display: flex; flex-direction: column; 
-      padding: 15px; 
-      overflow-y: auto;
-      transition: transform 0.5s ease-in-out;
-      z-index: 10;
+      display: flex; flex-direction: column; padding: 15px; overflow-y: auto;
+      transition: transform 0.5s ease-in-out; z-index: 10;
     }
 
     .hero-title { text-align: center; margin: 10px 0 20px 0; }
@@ -33,7 +30,7 @@
     .home-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px; margin: 0 auto; }
     .search-box { background: var(--panel-bg); border: var(--glass-border); border-radius: 15px; padding: 15px; }
 
-    /* --- PERFORMANCE STAGE (Landscape Optimized) --- */
+    /* --- STAGE --- */
     #stage-view { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
       transform: translateY(100%); z-index: 20; display: flex; background: #000;
@@ -44,8 +41,6 @@
     body.in-stage #stage-view { transform: translateY(0); }
 
     #stage { flex: 1; height: 100%; position: relative; transition: flex 0.5s ease; }
-    
-    /* VIDEO PLAYER DRAWER: Keeps video at 75% width, pushes panel to 25% */
     body.drawer-open #stage { flex: 0.75; } 
     
     #side-drawer { 
@@ -53,7 +48,7 @@
       border-left: var(--glass-border); transition: width 0.5s ease; 
       overflow: hidden; display: flex; flex-direction: column; 
     }
-    body.drawer-open #side-drawer { width: 25vw; } /* Narrower drawer for video player */
+    body.drawer-open #side-drawer { width: 25vw; }
 
     /* --- UI ELEMENTS --- */
     input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 14px; margin-bottom: 10px; }
@@ -70,9 +65,7 @@
 <body>
 
 <div id="homepage">
-  <div class="hero-title">
-    <h1>NZM VIDEOKE</h1>
-  </div>
+  <div class="hero-title"><h1>NZM PREMIUM VIDEOKE🎤</h1></div>
   <div class="home-content">
     <div class="search-box">
       <input id="homeSearchInput" type="text" placeholder="Search Song or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
@@ -99,8 +92,8 @@
     </div>
     <div style="padding: 12px; flex: 1; overflow-y: auto;">
       <small style="color:#888; font-size: 9px;">NOW SINGING</small>
-      <div id="stageNowPlaying" style="font-size:11px; color:#fcf6ba; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
-      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:11px; padding: 8px;">
+      <div id="stageNowPlaying" style="font-size:11px; color:#fcf6ba; margin-bottom: 12px;">-</div>
+      <input id="stageSearchInput" type="text" placeholder="Quick Search..." style="font-size:11px;">
       <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 8px;">SEARCH</button>
       <div id="stageResults" style="margin-top:12px;"></div>
       <button onclick="exitToHome()" style="background:none; color:#444; width:100%; margin-top:15px; font-size:9px; border:none; text-decoration: underline;">EXIT STAGE</button>
@@ -109,7 +102,7 @@
 </div>
 
 <div id="score-screen">
-  <div style="width:180px; height:180px; border-radius:50%; background:var(--platinum-gold); color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 0 40px rgba(191,149,63,0.5);">
+  <div style="width:180px; height:180px; border-radius:50%; background:var(--platinum-gold); color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <b style="font-size:12px;">SCORE</b>
     <div id="finalScore" style="font-size:70px; font-weight:900;">0</div>
   </div>
@@ -185,18 +178,16 @@
       </div>`).join('');
   }
 
+  // UPDATED: No more prompt for singer name
   function addToQueue(vId, title) {
-    const name = prompt("Singer Name:", "Guest");
-    if(name) {
-      queue.push({ vId, title: unescape(title), name });
-      updateQueueUI();
-    }
+    queue.push({ vId, title: unescape(title) });
+    updateQueueUI();
   }
 
   function updateQueueUI() {
-    document.getElementById('homeQueue').innerHTML = queue.map(i => `
+    document.getElementById('homeQueue').innerHTML = queue.map((i, idx) => `
       <div style="padding:8px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid #bf953f;">
-        <b>${i.name}</b>: ${i.title}
+        <b>#${idx + 1}</b> ${i.title}
       </div>`).join('') || '<p style="color:#444; font-size:10px; text-align:center;">Queue is empty</p>';
   }
 
