@@ -30,6 +30,18 @@
     .home-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px; margin: 0 auto; }
     .search-box { background: var(--panel-bg); border: var(--glass-border); border-radius: 15px; padding: 15px; }
 
+    /* Singer A-Z List Styling */
+    .singer-list { 
+      display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; 
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .singer-list::-webkit-scrollbar { display: none; }
+    .singer-chip { 
+      flex: 0 0 auto; padding: 8px 15px; background: rgba(255,255,255,0.05); 
+      border: 1px solid #444; border-radius: 20px; font-size: 11px; cursor: pointer;
+    }
+    .singer-chip:active { background: var(--platinum-gold); color: #000; }
+
     /* --- STAGE --- */
     #stage-view { 
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
@@ -52,15 +64,14 @@
 
     /* --- UI ELEMENTS --- */
     input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; font-size: 13px; margin-bottom: 8px; }
-    .gold-btn { padding: 10px; border: none; border-radius: 8px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; width: 100%; cursor: pointer; font-size: 11px; }
+    .gold-btn { padding: 10px; border: none; border-radius: 8px; background: var(--platinum-gold); color: #000; font-weight: bold; text-transform: uppercase; width: 100%; cursor: pointer; font-size: 11px; margin-bottom: 5px; }
     
     .song-item { display: flex; gap: 8px; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 6px; align-items: center; }
     .song-item img { width: 45px; border-radius: 4px; }
     .song-item h4 { margin: 0; font-size: 10px; flex: 1; color: #fcf6ba; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* QUEUE LIST STYLING */
     .queue-container { margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
-    .queue-item { padding: 6px 10px; background: rgba(212, 175, 55, 0.1); border-radius: 6px; margin-bottom: 4px; font-size: 10px; border-left: 2px solid #bf953f; display: flex; justify-content: space-between; }
+    .queue-item { padding: 6px 10px; background: rgba(212, 175, 55, 0.1); border-radius: 6px; margin-bottom: 4px; font-size: 10px; border-left: 2px solid #bf953f; }
 
     #score-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     #touch-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
@@ -70,12 +81,20 @@
 
 <div id="homepage">
   <div class="hero-title"><h1>NZM VIDEOKE🎤</h1></div>
+  
   <div class="home-content">
+    <div class="search-box" style="padding: 10px 15px;">
+      <small style="color: #bf953f; font-size: 10px; font-weight: bold;">SINGER LIST A-Z</small>
+      <div id="singerList" class="singer-list">
+        </div>
+    </div>
+
     <div class="search-box">
       <input id="homeSearchInput" type="text" placeholder="Search Song or Artist..." onkeypress="if(event.key==='Enter') searchHome()">
       <button class="gold-btn" onclick="searchHome()">FIND SONG</button>
       <div id="homeResults" style="margin-top: 15px; max-height: 250px; overflow-y: auto;"></div>
     </div>
+
     <div class="search-box">
       <h3 style="margin:0 0 10px 0; font-size:13px; color:#fcf6ba;">UPCOMING SINGERS</h3>
       <div id="homeQueue"></div>
@@ -98,6 +117,8 @@
       <small style="color:#888; font-size: 8px;">NOW PLAYING</small>
       <div id="stageNowPlaying" style="font-size:10px; color:#fcf6ba; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
       
+      <button class="gold-btn" onclick="playNextInQueue()" style="background: #fff; color: #000; margin-bottom: 15px;">⏭ PLAY NEXT</button>
+
       <input id="stageSearchInput" type="text" placeholder="Add another song..." style="font-size:11px;">
       <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 6px;">SEARCH</button>
       <div id="stageResults" style="margin-top:10px;"></div>
@@ -125,12 +146,32 @@
   const API_KEY = 'AIzaSyBVcJ_KWBBTACy-FeeLAj8sE8ltNGTd8aQ'; 
   let player, queue = [];
 
+  // SINGER DATABASE
+  const artists = [
+    "Air Supply", "Adele", "Bruno Mars", "Backstreet Boys", "Celine Dion", 
+    "Daniel Padilla", "Ed Sheeran", "Eraserheads", "Gary Valenciano", "Justine Bieber",
+    "Justin Bieber", "Katy Perry", "Lady Gaga", "Moira Dela Torre", "Michael Jackson",
+    "Maroon 5", "Queen", "Regine Velasquez", "Sam Smith", "Taylor Swift", "Westlife"
+  ].sort();
+
+  window.onload = () => {
+    const list = document.getElementById('singerList');
+    list.innerHTML = artists.map(name => `
+      <div class="singer-chip" onclick="searchBySinger('${name}')">${name}</div>
+    `).join('');
+  };
+
   function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
       height: '100%', width: '100%', videoId: '',
       playerVars: { 'autoplay': 1, 'rel': 0, 'controls': 0, 'modestbranding': 1, 'playsinline': 1 },
       events: { 'onStateChange': (e) => { if(e.data === 0) triggerScore(); } }
     });
+  }
+
+  function searchBySinger(name) {
+    document.getElementById('homeSearchInput').value = name;
+    searchHome();
   }
 
   function toggleDrawer() { document.body.classList.toggle('drawer-open'); }
@@ -168,7 +209,7 @@
   async function fetchYoutube(q) {
     if(!q) return [];
     try {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + " karaoke instrumental")}&type=video&maxResults=8&key=${API_KEY}`);
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + " karaoke instrumental")}&type=video&maxResults=10&key=${API_KEY}`);
       const data = await res.json();
       return data.items || [];
     } catch(e) { return []; }
@@ -200,7 +241,6 @@
         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>#${idx + 1}</b> ${i.title}</span>
       </div>`).join('') || '<p style="color:#444; font-size:9px; text-align:center;">No upcoming songs</p>';
     
-    // Sync both Queue containers
     document.getElementById('homeQueue').innerHTML = queueHTML;
     document.getElementById('stageQueue').innerHTML = queueHTML;
   }
