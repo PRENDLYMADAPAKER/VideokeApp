@@ -30,15 +30,16 @@
     .home-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px; margin: 0 auto; }
     .search-box { background: var(--panel-bg); border: var(--glass-border); border-radius: 15px; padding: 15px; }
 
-    /* Singer A-Z List Styling */
+    /* SINGER LIST A-Z */
     .singer-list { 
       display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; 
-      scrollbar-width: none; -ms-overflow-style: none;
+      scrollbar-width: thin; scrollbar-color: #bf953f #000;
     }
-    .singer-list::-webkit-scrollbar { display: none; }
+    .singer-list::-webkit-scrollbar { height: 3px; }
+    .singer-list::-webkit-scrollbar-thumb { background: #bf953f; border-radius: 10px; }
     .singer-chip { 
-      flex: 0 0 auto; padding: 8px 15px; background: rgba(255,255,255,0.05); 
-      border: 1px solid #444; border-radius: 20px; font-size: 11px; cursor: pointer;
+      flex: 0 0 auto; padding: 8px 16px; background: rgba(255,255,255,0.07); 
+      border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; font-size: 11px; cursor: pointer; transition: 0.2s;
     }
     .singer-chip:active { background: var(--platinum-gold); color: #000; }
 
@@ -84,9 +85,8 @@
   
   <div class="home-content">
     <div class="search-box" style="padding: 10px 15px;">
-      <small style="color: #bf953f; font-size: 10px; font-weight: bold;">SINGER LIST A-Z</small>
-      <div id="singerList" class="singer-list">
-        </div>
+      <small style="color: #bf953f; font-size: 10px; font-weight: bold; text-transform: uppercase;">Popular Artists</small>
+      <div id="singerList" class="singer-list"></div>
     </div>
 
     <div class="search-box">
@@ -117,7 +117,8 @@
       <small style="color:#888; font-size: 8px;">NOW PLAYING</small>
       <div id="stageNowPlaying" style="font-size:10px; color:#fcf6ba; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
       
-      <button class="gold-btn" onclick="playNextInQueue()" style="background: #fff; color: #000; margin-bottom: 15px;">⏭ PLAY NEXT</button>
+      <button class="gold-btn" onclick="playNextInQueue()" style="background: #fff; color: #000; margin-bottom: 10px;">⏭ PLAY NEXT</button>
+      <button class="gold-btn" onclick="exitToHome()" style="background: #c0392b; color: #fff; margin-bottom: 15px;">🏠 EXIT TO HOME</button>
 
       <input id="stageSearchInput" type="text" placeholder="Add another song..." style="font-size:11px;">
       <button class="gold-btn" onclick="searchStage()" style="font-size:9px; padding: 6px;">SEARCH</button>
@@ -127,8 +128,6 @@
         <h4 style="margin: 0 0 8px 0; font-size: 10px; color: #bf953f;">STAGE QUEUE</h4>
         <div id="stageQueue"></div>
       </div>
-
-      <button onclick="exitToHome()" style="background:none; color:#444; width:100%; margin-top:20px; font-size:9px; border:none; text-decoration: underline;">EXIT TO MENU</button>
     </div>
   </div>
 </div>
@@ -146,12 +145,29 @@
   const API_KEY = 'AIzaSyBVcJ_KWBBTACy-FeeLAj8sE8ltNGTd8aQ'; 
   let player, queue = [];
 
-  // SINGER DATABASE
+  // EXPANDED SINGER LIST (A-Z Mix)
   const artists = [
-    "Air Supply", "Adele", "Bruno Mars", "Backstreet Boys", "Celine Dion", 
-    "Daniel Padilla", "Ed Sheeran", "Eraserheads", "Gary Valenciano", "Justine Bieber",
-    "Justin Bieber", "Katy Perry", "Lady Gaga", "Moira Dela Torre", "Michael Jackson",
-    "Maroon 5", "Queen", "Regine Velasquez", "Sam Smith", "Taylor Swift", "Westlife"
+    "Adele", "Air Supply", "April Boy Regino", "Andrew E", "Aegis", 
+    "Bruno Mars", "Backstreet Boys", "Bon Jovi", "Bamboo",
+    "Celine Dion", "Carpenters", "Christian Bautista",
+    "Daniel Padilla", "Don Moen", "Dua Lipa",
+    "Ed Sheeran", "Eraserheads", "Elvis Presley",
+    "Gary Valenciano", "Guns N' Roses", "Gloc-9",
+    "Imelda Papin", "Iñigo Pascual", "Imagine Dragons",
+    "Justin Bieber", "Jireh Lim", "Jose Mari Chan",
+    "Katy Perry", "KZ Tandingan", "Kamikazee",
+    "Lady Gaga", "Lukas Graham", "Lewis Capaldi",
+    "Moira Dela Torre", "Michael Jackson", "Maroon 5", "Mayonnaise",
+    "Ne-Yo", "Nirvana", "Nikki Gil",
+    "Olivia Rodrigo", "One Direction", "Orange and Lemons",
+    "Parokya ni Edgar", "Post Malone", "Pinkfong",
+    "Queen", "Rivermaya", "Regine Velasquez", "Rey Valera",
+    "Sam Smith", "Silent Sanctuary", "Sponge Cola",
+    "Taylor Swift", "The Juans", "The Beatles",
+    "UB40", "U2", "Up Dharma Down",
+    "Vice Ganda", "Vina Morales", "VST & Co.",
+    "Westlife", "Whitney Houston", "Wiz Khalifa",
+    "Zack Tabudlo", "Zayn", "Zedd"
   ].sort();
 
   window.onload = () => {
