@@ -1437,7 +1437,7 @@
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' karaoke instrumental')}&type=video&maxResults=50&key=${API_KEY}`);
     const data = await res.json();
 
-    const blockedChannels = ['Sing King Karaoke'];
+    const blockedChannels = ['Sing King'];
 
     return (data.items || []).filter(item => {
       const channel = item?.snippet?.channelTitle || '';
