@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NZM Videoke TV Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .gold {
+      background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+    }
+
+    .panel {
+      background: rgba(12,12,12,.94);
+      border-left: 1px solid rgba(217,179,93,.28);
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+
+    #qrCode img,
+    #qrCode canvas {
+      width: 140px !important;
+      height: 140px !important;
+      border-radius: 12px;
+    }
+
+    .tv-layout {
+      grid-template-columns: minmax(0, 1fr) 320px;
+    }
+
+    @media (max-width: 1100px) {
+      .tv-layout {
+        grid-template-columns: minmax(0, 1fr) 260px;
+      }
+
+      .side-panel {
+        padding: 12px;
+      }
+
+      .side-title {
+        font-size: 20px;
+      }
+
+      #qrCode img,
+      #qrCode canvas {
+        width: 112px !important;
+        height: 112px !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      html, body {
+        overflow: auto;
+      }
+
+      .tv-layout {
+        min-height: 100vh;
+        display: flex !important;
+        flex-direction: column;
+      }
+
+      .player-section {
+        min-height: 58vh;
+        height: 58vh;
+      }
+
+      .side-panel {
+        height: auto !important;
+        min-height: 42vh;
+        border-left: none;
+        border-top: 1px solid rgba(217,179,93,.28);
+        padding: 12px;
+      }
+
+      .side-title {
+        font-size: 20px;
+      }
+
+      .now-box {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+
+      .queue-list-mobile {
+        max-height: 180px;
+      }
+
+      .qr-card {
+        margin-top: 10px;
+        padding: 8px;
+      }
+
+      #qrCode img,
+      #qrCode canvas {
+        width: 96px !important;
+        height: 96px !important;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 560px) {
+      .tv-layout {
+        grid-template-columns: minmax(0, 1fr) 240px;
+      }
+
+      .side-panel {
+        padding: 8px;
+      }
+
+      .side-title {
+        font-size: 18px;
+      }
+
+      .now-box {
+        padding: 6px;
+        margin-bottom: 6px;
+      }
+
+      .queue-list-mobile {
+        max-height: 140px;
+      }
+
+      #qrCode img,
+      #qrCode canvas {
+        width: 86px !important;
+        height: 86px !important;
+      }
+    }
+  
+    .tv-focusable,
+    .queue-row-item {
+      cursor: pointer;
+      outline: none;
+      transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    }
+
+    .tv-focusable:focus,
+    .tv-focusable.tv-focused,
+    .queue-row-item:focus,
+    .queue-row-item.is-selected {
+      border-color: rgba(255, 241, 168, 0.95) !important;
+      background-color: rgba(255, 241, 168, 0.15) !important;
+      box-shadow: 0 0 0 3px rgba(217, 179, 93, 0.45);
+      transform: scale(1.01);
+    }
+
+    .tv-focusable:focus-visible,
+    .queue-row-item:focus-visible {
+      outline: 2px solid rgba(255, 241, 168, 0.95);
+      outline-offset: 2px;
+    }
+
+    .side-panel {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .queue-list-mobile {
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 760px) {
+      .side-panel {
+        overflow-y: auto !important;
+        max-height: none;
+      }
+
+      .queue-list-mobile {
+        flex: none !important;
+        min-height: 140px;
+        max-height: 38vh;
+        overflow-y: auto !important;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 560px) {
+      .side-panel {
+        overflow-y: auto !important;
+      }
+
+      .queue-list-mobile {
+        flex: none !important;
+        max-height: 35vh;
+        overflow-y: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="text-white">
+  <div id="loginScreen" class="fixed inset-0 z-50 grid place-items-center bg-black">
+    <div class="w-[92vw] max-w-md rounded-3xl border border-yellow-500/30 bg-zinc-950 p-6 shadow-2xl">
+      <h1 class="mb-2 text-center text-3xl font-black text-yellow-200">NZM VIDEOKE 🎤</h1>
+      <p class="mb-5 text-center text-sm text-zinc-400">Login on the TV to create a private room.</p>
+
+      <input id="emailInput" class="mb-3 w-full rounded-2xl bg-black p-4 text-white ring-1 ring-white/10" placeholder="Email" type="email" />
+      <input id="passwordInput" class="mb-3 w-full rounded-2xl bg-black p-4 text-white ring-1 ring-white/10" placeholder="Password" type="password" />
+
+      <button id="loginBtn" class="gold mb-3 w-full rounded-2xl p-4 font-black text-black">Login / Create Account</button>
+      <p id="loginError" class="min-h-5 text-center text-sm text-red-300"></p>
+    </div>
+  </div>
+
+  <main id="app" class="tv-layout grid h-screen">
+    <section class="player-section relative bg-black">
+      <div id="playerShell" class="relative h-full w-full bg-black">
+        <div id="player" class="h-full w-full"></div>
+        <div id="playerPlaceholder" class="absolute inset-0 grid place-items-center bg-black text-center">
+          <div>
+            <div class="mb-3 text-6xl">🎤</div>
+            <div class="text-3xl font-black text-yellow-200">NZM VIDEOKE</div>
+            <div class="mt-2 text-zinc-400">Waiting for song from remote...</div>
+            <div class="mt-2 text-xs text-zinc-600">Tap/OK once to enable autoplay on strict TV browsers</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pointer-events-none absolute left-5 top-5 rounded-full bg-black/70 px-5 py-3 text-sm text-yellow-100 ring-1 ring-yellow-400/30">
+        <span id="statusText">Waiting for remote...</span>
+      </div>
+    </section>
+
+    <aside id="sidePanel" class="side-panel panel flex h-screen flex-col p-4">
+      <div class="mb-3">
+        <h1 class="side-title text-2xl font-black text-yellow-200">NZM VIDEOKE 🎤</h1>
+        <p class="mt-0.5 text-xs text-zinc-400">Player Only Mode</p>
+      </div>
+
+      <button id="enableAudioBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable mb-3 w-full rounded-xl border border-emerald-200/40 bg-emerald-500 py-2.5 px-4 text-base font-black text-black shadow-md ring-1 ring-emerald-200/30">
+        🔊 Enable Audio
+      </button>
+
+      <div class="now-box mb-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
+        <div class="text-[10px] uppercase tracking-widest text-yellow-300 font-bold">Now Playing</div>
+        <div id="nowPlaying" class="mt-1 line-clamp-2 text-sm font-semibold text-white">Nothing playing yet</div>
+      </div>
+
+      <div class="mb-1 flex items-center justify-between">
+        <h2 class="text-lg font-black">Queued Songs</h2>
+        <span id="queueCount" class="rounded-full bg-yellow-500/20 px-2.5 py-0.5 text-xs text-yellow-200 font-bold">0</span>
+      </div>
+      <p class="mb-2 text-[11px] text-zinc-500">TV remote: ↑/↓ to browse • OK to play • Back/Del to remove</p>
+
+      <div id="queueList" class="queue-list-mobile min-h-0 flex-1 overflow-y-auto pr-1">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-zinc-800 text-[11px] text-zinc-400 uppercase tracking-wider">
+              <th class="py-1.5 pl-2 w-10">#</th>
+              <th class="py-1.5 w-14">Cover</th>
+              <th class="py-1.5">Song/Singer</th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody" class="divide-y divide-zinc-900/50">
+            <tr>
+              <td colspan="3" class="py-6 text-center text-sm text-zinc-500">No queued songs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button id="toggleQrBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable mt-3 w-full rounded-xl border border-yellow-500/20 bg-zinc-900 py-2 text-xs font-bold text-yellow-200 shadow-md">
+        📲 Show QR Code
+      </button>
+
+      <div id="qrCardWrapper" class="hidden mt-2 rounded-2xl border border-yellow-500/20 bg-white p-2.5 mx-auto">
+        <div id="qrCode" class="grid place-items-center"></div>
+      </div>
+
+      <div class="mt-2 rounded-xl bg-yellow-500/5 px-2 py-1.5 text-center ring-1 ring-yellow-500/15">
+        <div class="text-[9px] uppercase tracking-widest text-yellow-300 font-semibold">Room</div>
+        <div id="roomCodeText" class="text-base font-black text-yellow-100 tracking-wider">----</div>
+      </div>
+
+      <button id="newRoomBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable mt-2 rounded-xl border border-yellow-500/10 bg-zinc-900 py-2 text-xs font-bold text-yellow-100/80">
+        New Room
+      </button>
+    </aside>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      onChildAdded,
+      onValue,
+      set,
+      remove,
+      get,
+      update,
+      off
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFUZe8BZKPzU5E_es0Gv5xsqkliB3tTes",
+      authDomain: "admin-panel-87530.firebaseapp.com",
+      databaseURL: "https://admin-panel-87530-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "admin-panel-87530",
+      storageBucket: "admin-panel-87530.firebasestorage.app",
+      messagingSenderId: "1065643470010",
+      appId: "1:1065643470010:web:ea79e85fef283dfb05a683",
+      measurementId: "G-YSCLM1KL0Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const params = new URLSearchParams(location.search);
+    let roomId = params.get("room") || localStorage.getItem("nzmRoom") || makeRoomId();
+
+    let currentUser = null;
+    let player = null;
+    let playerReady = false;
+    let hasLoadedVideo = false;
+    let currentVideoId = null;
+    let audioUnlocked = localStorage.getItem("nzmAudioUnlocked") === "1";
+    let queueListenerRef = null;
+    let commandsListenerRef = null;
+    const processedCommands = new Set();
+    let tvQueueItems = [];
+    let selectedQueueIndex = 0;
+    let sidePanelFocusIndex = 0;
+    let isQrVisible = false;
+
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player("player", {
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          enablejsapi: 1
+        },
+        events: {
+          onReady: () => {
+            playerReady = true;
+            updateEnableAudioButton();
+            setStatus(audioUnlocked ? "Player ready. Audio enabled." : "Player ready. Press Enable Audio once on TV.");
+          },
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.ENDED) {
+              playNextSong();
+            }
+          },
+          onError: () => {
+            setStatus("This video cannot be played. Press Next.");
+          }
+        }
+      });
+    };
+
+    function loadYouTubeIframeApi() {
+      if (window.YT && window.YT.Player) {
+        window.onYouTubeIframeAPIReady();
+        return;
+      }
+
+      const tag = document.createElement("script");
+      tag.src = "https://youtube.com/iframe_api";
+      document.body.appendChild(tag);
+    }
+
+    loadYouTubeIframeApi();
+
+    function makeRoomId() {
+      return Math.random().toString(36).slice(2, 8).toUpperCase();
+    }
+
+    function userRoomPath(path = "") {
+      if (!currentUser) throw new Error("User is not logged in yet.");
+      return `users/${currentUser.uid}/rooms/${roomId}${path ? "/" + path : ""}`;
+    }
+
+    function roomRef(path = "") {
+      return ref(db, userRoomPath(path));
+    }
+
+    function setStatus(text) {
+      document.getElementById("statusText").textContent = text;
+    }
+
+    function updateEnableAudioButton() {
+      const btn = document.getElementById("enableAudioBtn");
+      if (!btn) return;
+
+      if (audioUnlocked) {
+        btn.textContent = "🔊 Audio Enabled";
+        btn.className = "mb-3 w-full rounded-xl bg-emerald-700/30 py-2 px-4 text-sm font-black text-emerald-100 ring-1 ring-emerald-400/20";
+      } else {
+        btn.textContent = "🔊 Enable Audio";
+        btn.className = "mb-3 w-full rounded-xl bg-emerald-500 py-2.5 px-4 text-base font-black text-black shadow-md ring-1 ring-emerald-200/30";
+      }
+    }
+
+    function markAudioUnlocked() {
+      audioUnlocked = true;
+      localStorage.setItem("nzmAudioUnlocked", "1");
+      updateEnableAudioButton();
+    }
+
+    function requestAudioUnlock() {
+      if (!playerReady || !player) {
+        setStatus("Player still loading. Try Enable Audio again.");
+        return;
+      }
+
+      try {
+        markAudioUnlocked();
+        player.unMute();
+        player.setVolume(80);
+
+        if (hasLoadedVideo && currentVideoId) {
+          player.playVideo();
+          setStatus("Audio enabled. Playing with sound.");
+        } else {
+          setStatus("Audio enabled. Choose a song from the remote.");
+        }
+      } catch (error) {
+        console.warn(error);
+        setStatus("Audio unlock failed. Press Enable Audio again.");
+      }
+    }
+
+    document.getElementById("enableAudioBtn").addEventListener("click", requestAudioUnlock);
+
+    // QR visibility toggler
+    const toggleQrBtn = document.getElementById("toggleQrBtn");
+    toggleQrBtn.addEventListener("click", () => {
+      isQrVisible = !isQrVisible;
+      const card = document.getElementById("qrCardWrapper");
+      if (isQrVisible) {
+        card.classList.remove("hidden");
+        toggleQrBtn.textContent = "🙈 Hide QR Code";
+      } else {
+        card.classList.add("hidden");
+        toggleQrBtn.textContent = "📲 Show QR Code";
+      }
+    });
+
+    function startPlaybackWithBestAudio() {
+      if (!playerReady || !player) return;
+
+      try {
+        if (audioUnlocked) {
+          player.unMute();
+        } else {
+          player.mute();
+        }
+
+        player.playVideo();
+        setStatus(audioUnlocked ? "Playing" : "Playing muted. Press Enable Audio on TV.");
+      } catch (error) {
+        console.warn(error);
+        setStatus("Could not start playback. Press Enable Audio on TV.");
+      }
+    }
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>'"]/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      }[c]));
+    }
+
+    function thumbnail(videoId) {
+      return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+    }
+
+    async function loginOrCreate() {
+      const email = document.getElementById("emailInput").value.trim();
+      const password = document.getElementById("passwordInput").value;
+      const err = document.getElementById("loginError");
+
+      err.textContent = "";
+
+      if (!email || !password) {
+        err.textContent = "Enter email and password.";
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (loginError) {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (createError) {
+          err.textContent = createError.message;
+        }
+      }
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", loginOrCreate);
+
+    document.getElementById("passwordInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") loginOrCreate();
+    });
+
+    document.getElementById("newRoomBtn").addEventListener("click", async () => {
+      roomId = makeRoomId();
+      localStorage.setItem("nzmRoom", roomId);
+      history.replaceState(null, "", `?room=${encodeURIComponent(roomId)}`);
+
+      processedCommands.clear();
+
+      if (currentUser) {
+        stopListeners();
+        await initRoom();
+      }
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) return;
+
+      currentUser = user;
+      document.getElementById("loginScreen").style.display = "none";
+
+      localStorage.setItem("nzmRoom", roomId);
+      history.replaceState(null, "", `?room=${encodeURIComponent(roomId)}`);
+
+      await initRoom();
+    });
+
+    async function initRoom() {
+      await update(roomRef(), {
+        roomId,
+        ownerUid: currentUser.uid,
+        updatedAt: Date.now()
+      });
+
+      renderQR();
+      listenQueue();
+      listenCommands();
+      focusFirstAvailableTvControl();
+
+      setStatus("Room active. Scan QR to connect.");
+    }
+
+    function renderQR() {
+      const remoteUrl = `https://videokeremote.vercel.app/?room=${encodeURIComponent(roomId)}&owner=${encodeURIComponent(currentUser.uid)}`;
+
+      const roomCodeText = document.getElementById("roomCodeText");
+      if (roomCodeText) roomCodeText.textContent = roomId;
+
+      document.getElementById("qrCode").innerHTML = "";
+
+      new QRCode(document.getElementById("qrCode"), {
+        text: remoteUrl,
+        width: 140,
+        height: 140,
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function stopListeners() {
+      if (queueListenerRef) {
+        off(queueListenerRef);
+        queueListenerRef = null;
+      }
+
+      if (commandsListenerRef) {
+        off(commandsListenerRef);
+        commandsListenerRef = null;
+      }
+    }
+
+    function listenQueue() {
+      queueListenerRef = roomRef("queue");
+
+      onValue(queueListenerRef, snapshot => {
+        const items = [];
+
+        snapshot.forEach(child => {
+          items.push({
+            key: child.key,
+            ...child.val()
+          });
+        });
+
+        items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        renderQueue(items);
+      });
+    }
+
+    function getTvFocusableElements() {
+      return [...document.querySelectorAll("#sidePanel [data-tv-focusable='true']")]
+        .filter(el => !el.disabled && el.offsetParent !== null && el.style.display !== "none");
+    }
+
+    function syncTvFocusClass() {
+      document.querySelectorAll("#sidePanel .tv-focused").forEach(el => el.classList.remove("tv-focused"));
+      const active = document.activeElement;
+      if (active && active.matches && active.matches("#sidePanel [data-tv-focusable='true']")) {
+        active.classList.add("tv-focused");
+      }
+    }
+
+    function focusTvElement(index = 0) {
+      const focusables = getTvFocusableElements();
+      if (!focusables.length) return;
+
+      sidePanelFocusIndex = Math.max(0, Math.min(index, focusables.length - 1));
+      const target = focusables[sidePanelFocusIndex];
+
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      syncTvFocusClass();
+    }
+
+    function moveSidePanelFocus(direction) {
+      const focusables = getTvFocusableElements();
+      if (!focusables.length) return;
+
+      const activeIndex = focusables.indexOf(document.activeElement);
+      const startIndex = activeIndex >= 0 ? activeIndex : sidePanelFocusIndex;
+      const nextIndex = Math.max(0, Math.min(startIndex + direction, focusables.length - 1));
+
+      focusTvElement(nextIndex);
+    }
+
+    function focusFirstAvailableTvControl() {
+      requestAnimationFrame(() => {
+        const preferred = document.getElementById("enableAudioBtn");
+        if (preferred && preferred.offsetParent !== null && preferred.style.display !== "none") {
+          preferred.focus({ preventScroll: true });
+          syncTvFocusClass();
+          return;
+        }
+
+        focusTvElement(0);
+      });
+    }
+
+    function renderQueue(items) {
+      tvQueueItems = items;
+      selectedQueueIndex = Math.min(selectedQueueIndex, Math.max(items.length - 1, 0));
+
+      document.getElementById("queueCount").textContent = items.length;
+      const tbody = document.getElementById("queueTableBody");
+
+      if (!items.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" class="py-6 text-center text-xs text-zinc-500">No queued songs</td>
+          </tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map((item, index) => `
+        <tr
+          class="queue-row-item border-b border-zinc-900/40 bg-zinc-950/20 ${index === selectedQueueIndex ? "is-selected" : ""}"
+          tabindex="0"
+          role="button"
+          aria-label="Play queued song ${index + 1}"
+          data-tv-focusable="true"
+          data-queue-index="${index}"
+          title="Press OK to play"
+        >
+          <td class="py-2 pl-2 font-black text-xs text-yellow-500/80">#${index + 1}</td>
+          <td class="py-2">
+            <img class="h-8 w-11 rounded object-cover border border-zinc-800" src="${item.thumbnail || thumbnail(item.videoId)}" />
+          </td>
+          <td class="py-2 pr-2 min-w-0">
+            <div class="truncate text-xs font-bold text-zinc-200">${escapeHtml(item.title || item.videoId)}</div>
+            <div class="truncate text-[10px] text-zinc-400 mt-0.5">${escapeHtml(item.singer || "Guest")}</div>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".queue-row-item").forEach(row => {
+        row.addEventListener("focus", () => {
+          selectedQueueIndex = Number(row.dataset.queueIndex || 0);
+          updateSelectedQueueVisual();
+          syncTvFocusClass();
+        });
+
+        row.addEventListener("blur", syncTvFocusClass);
+
+        row.addEventListener("click", async () => {
+          selectedQueueIndex = Number(row.dataset.queueIndex || 0);
+          updateSelectedQueueVisual();
+          await playSelectedQueueSong();
+        });
+      });
+
+      syncTvFocusClass();
+    }
+
+    function updateSelectedQueueVisual() {
+      const rows = [...document.querySelectorAll(".queue-row-item")];
+
+      rows.forEach((row, index) => {
+        row.classList.toggle("is-selected", index === selectedQueueIndex);
+      });
+
+      const selected = rows[selectedQueueIndex];
+      if (selected) {
+        selected.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+
+    async function playSelectedQueueSong() {
+      const item = tvQueueItems[selectedQueueIndex];
+      if (!item) {
+        setStatus("No selected queued song");
+        return;
+      }
+      await playSpecificSong(item, item.key);
+    }
+
+    async function removeSelectedQueueSong() {
+      const item = tvQueueItems[selectedQueueIndex];
+      if (!item || !item.key) return;
+
+      await remove(roomRef(`queue/${item.key}`));
+      selectedQueueIndex = Math.max(0, selectedQueueIndex - 1);
+      setStatus("Removed queued song");
+    }
+
+    function handleTvQueueKeys(event) {
+      const key = event.key;
+      const remoteOkKeys = ["Enter", " ", "Spacebar", "OK", "Select"];
+      const remoteBackKeys = ["Backspace", "Delete", "BrowserBack", "Escape"];
+
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", ...remoteOkKeys, ...remoteBackKeys].includes(key)) return;
+
+      const active = document.activeElement;
+      const activeIsSidePanelControl = active && active.matches && active.matches("#sidePanel [data-tv-focusable='true']");
+      const activeIsQueueRow = active && active.classList && active.classList.contains("queue-row-item");
+
+      if (key === "ArrowUp") {
+        event.preventDefault();
+        moveSidePanelFocus(-1);
+        return;
+      }
+
+      if (key === "ArrowDown") {
+        event.preventDefault();
+        moveSidePanelFocus(1);
+        return;
+      }
+
+      if (key === "ArrowLeft" || key === "ArrowRight") {
+        event.preventDefault();
+        if (!activeIsSidePanelControl) focusTvElement(0);
+        return;
+      }
+
+      if (remoteOkKeys.includes(key)) {
+        if (!activeIsSidePanelControl) return;
+        event.preventDefault();
+
+        if (activeIsQueueRow) {
+          selectedQueueIndex = Number(active.dataset.queueIndex || 0);
+          updateSelectedQueueVisual();
+          playSelectedQueueSong();
+          return;
+        }
+
+        active.click();
+        return;
+      }
+
+      if (remoteBackKeys.includes(key)) {
+        if (!activeIsQueueRow) return;
+        event.preventDefault();
+        removeSelectedQueueSong();
+      }
+    }
+
+    document.addEventListener("keydown", handleTvQueueKeys);
+    document.addEventListener("focusin", syncTvFocusClass);
+    document.addEventListener("focusout", syncTvFocusClass);
+
+    function listenCommands() {
+      commandsListenerRef = roomRef("commands");
+
+      onChildAdded(commandsListenerRef, async snapshot => {
+        if (processedCommands.has(snapshot.key)) return;
+        processedCommands.add(snapshot.key);
+
+        const cmd = snapshot.val();
+        if (!cmd || !cmd.type) return;
+
+        if (cmd.type === "play") {
+          await handleRemotePlay();
+          return;
+        }
+
+        if (cmd.type === "pause") {
+          pauseCurrentSong();
+          return;
+        }
+
+        if (cmd.type === "next") {
+          await playNextSong();
+          return;
+        }
+
+        if (cmd.type === "replay") {
+          replayCurrentSong();
+          return;
+        }
+
+        if (cmd.type === "volume") {
+          setVolumeFromRemote(cmd.value);
+          return;
+        }
+
+        if (cmd.type === "playVideo" && cmd.videoId) {
+          await playSpecificSong(cmd, null);
+          return;
+        }
+      });
+    }
+
+    async function handleRemotePlay() {
+      if (!playerReady) {
+        setStatus("Player still loading. Try Play again.");
+        return;
+      }
+
+      if (hasLoadedVideo && currentVideoId) {
+        forcePlayCurrentVideo();
+        return;
+      }
+
+      await playNextSong();
+    }
+
+    function forcePlayCurrentVideo() {
+      if (!playerReady || !player) return;
+      startPlaybackWithBestAudio();
+    }
+
+    function pauseCurrentSong() {
+      if (!playerReady || !player || !hasLoadedVideo) {
+        setStatus("No song playing");
+        return;
+      }
+
+      try {
+        player.pauseVideo();
+        setStatus("Paused");
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    function replayCurrentSong() {
+      if (!playerReady || !player || !hasLoadedVideo) {
+        setStatus("No song to replay");
+        return;
+      }
+
+      try {
+        player.seekTo(0, true);
+        forcePlayCurrentVideo();
+        setStatus("Replay");
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    function setVolumeFromRemote(value) {
+      if (!playerReady || !player) return;
+
+      const volume = Math.max(0, Math.min(100, Number(value || 80)));
+
+      try {
+        player.setVolume(volume);
+        setStatus(`Volume ${volume}%`);
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    async function playNextSong() {
+      const snap = await get(roomRef("queue"));
+      const items = [];
+
+      snap.forEach(child => {
+        items.push({
+          key: child.key,
+          ...child.val()
+        });
+      });
+
+      items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+      if (!items.length) {
+        setStatus("Queue empty");
+        return;
+      }
+
+      await playSpecificSong(items[0], items[0].key);
+    }
+
+    async function playSpecificSong(song, queueKey = null) {
+      if (!song || !song.videoId) return;
+
+      hasLoadedVideo = true;
+      currentVideoId = song.videoId;
+
+      const placeholder = document.getElementById("playerPlaceholder");
+      if (placeholder) placeholder.style.display = "none";
+
+      document.getElementById("nowPlaying").textContent = song.title || song.videoId;
+      setStatus("Loading song...");
+
+      if (playerReady && player) {
+        try {
+          if (audioUnlocked) {
+            player.unMute();
+          } else {
+            player.mute();
+          }
+
+          player.loadVideoById({
+            videoId: song.videoId,
+            startSeconds: 0
+          });
+        } catch (error) {
+          console.warn(error);
+          setStatus("Could not load video.");
+        }
+
+        setTimeout(startPlaybackWithBestAudio, 250);
+        setTimeout(startPlaybackWithBestAudio, 800);
+        setTimeout(startPlaybackWithBestAudio, 1400);
+        setTimeout(startPlaybackWithBestAudio, 2200);
+      } else {
+        setStatus("Player still loading. Try Play again.");
+      }
+
+      await set(roomRef("nowPlaying"), {
+        ...song,
+        startedAt: Date.now()
+      });
+
+      if (queueKey) {
+        await remove(roomRef(`queue/${queueKey}`));
+      }
+    }
+  </script>
+</body>
+</html>
