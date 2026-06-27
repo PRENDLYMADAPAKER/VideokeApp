@@ -83,6 +83,7 @@
       }
     }
 
+    /* Deep Optimization for Mobile and Small Tablet Screen Real Estate */
     @media (max-width: 760px) {
       html, body {
         overflow: auto;
@@ -95,8 +96,8 @@
       }
 
       .player-section {
-        height: 40vh;
-        min-height: 280px;
+        height: 35vh;
+        min-height: 220px;
       }
 
       .side-panel {
@@ -104,6 +105,37 @@
         flex: 1 0 auto;
         border-left: none;
         border-top: 1px solid rgba(229, 169, 59, 0.12);
+        padding: 1rem !important;
+      }
+
+      /* Login Responsiveness Adjustments */
+      .login-card {
+        padding: 1.5rem !important;
+        width: 88vw !important;
+      }
+      .login-title {
+        font-size: 1.5rem !important;
+      }
+      .login-logo {
+        height: 2.75rem !important;
+        width: 2.75rem !important;
+        font-size: 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+
+      /* Player Idle State Fonts / Logo Responsiveness */
+      .player-logo {
+        font-size: 3rem !important;
+      }
+      .player-title {
+        font-size: 1.5rem !important;
+        letter-spacing: 0.05em !important;
+      }
+      .player-subtitle {
+        font-size: 0.75rem !important;
+        letter-spacing: 0.05em !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
       }
     }
   </style>
@@ -112,18 +144,18 @@
 
   <!-- Premium Login Overlay -->
   <div id="loginScreen" class="fixed inset-0 z-50 grid place-items-center bg-[#050508]/98 backdrop-blur-md">
-    <div class="w-[90vw] max-w-md rounded-2xl border border-amber-500/15 bg-zinc-950/80 p-8 shadow-2xl shadow-amber-500/5 text-center">
-      <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 mb-4 text-2xl shadow-inner text-amber-400">🎤</div>
-      <h1 class="mb-1 text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">NZM VIDEOKE</h1>
-      <p class="mb-6 text-xs font-medium text-zinc-500 tracking-wide uppercase">To login your account just add @nzm.local to given Username</p>
+    <div class="login-card w-[90vw] max-w-md rounded-2xl border border-amber-500/15 bg-zinc-950/80 p-8 shadow-2xl shadow-amber-500/5 text-center transition-all">
+      <div class="login-logo inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 mb-4 text-2xl shadow-inner text-amber-400">🎤</div>
+      <h1 class="login-title mb-1 text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">NZM VIDEOKE</h1>
+      <p class="mb-5 text-[11px] font-medium text-zinc-500 tracking-wide uppercase">To Login just add @nzm.local to your Username</p>
 
-      <div class="space-y-3 mb-6 text-left">
-        <input id="emailInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-4 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Email Address" type="email" />
-        <input id="passwordInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-4 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Password" type="password" />
+      <div class="space-y-2.5 mb-5 text-left">
+        <input id="emailInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Email Address" type="email" />
+        <input id="passwordInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Password" type="password" />
       </div>
 
-      <button id="loginBtn" class="gold-gradient w-full rounded-xl p-4 font-bold text-zinc-950 shadow-lg shadow-amber-500/10 hover:opacity-95 transition active:scale-[0.99]">Login</button>
-      <p id="loginError" class="min-h-5 mt-4 text-center text-xs font-semibold text-rose-400"></p>
+      <button id="loginBtn" class="gold-gradient w-full rounded-xl p-3.5 font-bold text-zinc-950 shadow-lg shadow-amber-500/10 hover:opacity-95 transition active:scale-[0.99]">Login</button>
+      <p id="loginError" class="min-h-5 mt-3 text-center text-xs font-semibold text-rose-400"></p>
     </div>
   </div>
 
@@ -137,19 +169,20 @@
         
         <!-- Premium Idle State Layout -->
         <div id="playerPlaceholder" class="absolute inset-0 grid place-items-center bg-radial from-zinc-900 to-black text-center px-4">
-            <div class="animate-bounce inline-block text-7xl bg-clip-text drop-shadow-[0_10px_10px_rgba(229,169,59,0.2)]">🎤</div>
-            <div class="text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-zinc-50 to-zinc-300">NZM VIDEOKE PLAYER</div>
+          <div class="space-y-2 md:space-y-4">
+            <div class="player-logo animate-bounce inline-block text-7xl bg-clip-text drop-shadow-[0_10px_10px_rgba(229,169,59,0.2)]">🎤</div>
+            <div class="player-title text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-zinc-50 to-zinc-300">NZM VIDEOKE PLAYER</div>
             <div class="mx-auto h-px w-24 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
-            <p class="text-sm font-medium text-amber-200/60 tracking-widest uppercase">Awaiting Song Requests from Remote Control Panel</p>
+            <p class="player-subtitle text-sm font-medium text-amber-200/60 tracking-widest uppercase">Awaiting Song Requests from Remote Control Panel</p>
           </div>
         </div>
       </div>
 
       <!-- Toast Stream Monitor Status -->
-      <div class="pointer-events-none absolute left-6 top-6 flex items-center gap-2 rounded-full bg-zinc-950/80 backdrop-blur-md px-4 py-2.5 text-xs font-medium text-amber-200/90 shadow-xl border border-zinc-800/80">
-        <span class="relative flex h-2 w-2">
+      <div class="pointer-events-none absolute left-4 top-4 md:left-6 md:top-6 flex items-center gap-2 rounded-full bg-zinc-950/80 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2.5 text-[11px] md:text-xs font-medium text-amber-200/90 shadow-xl border border-zinc-800/80">
+        <span class="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          <span class="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-emerald-500"></span>
         </span>
         <span id="statusText" class="tracking-wide">System Idle</span>
       </div>
@@ -159,46 +192,46 @@
     <aside id="sidePanel" class="side-panel panel-glass flex h-screen flex-col p-5 overflow-y-auto premium-scroll">
       
       <!-- Brand Segment Header -->
-      <div class="mb-5 flex items-center justify-between">
+      <div class="mb-4 flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">NZM VIDEOKE</h1>
+          <h1 class="text-lg md:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">NZM VIDEOKE</h1>
         </div>
-        <div id="roomCodeText" class="text-sm font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-md tracking-widest">----</div>
+        <div id="roomCodeText" class="text-xs md:text-sm font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md tracking-widest">----</div>
       </div>
 
       <!-- Action Framework Commands -->
-      <div class="space-y-2 mb-4">
-        <button id="enableAudioBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-3 px-4 text-xs font-bold text-emerald-400 shadow-sm flex items-center justify-center gap-2">
+      <div class="space-y-2 mb-3">
+        <button id="enableAudioBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 px-4 text-xs font-bold text-emerald-400 shadow-sm flex items-center justify-center gap-2">
           <span class="text-sm">🔊</span> Enable Media Audio
         </button>
       </div>
 
       <!-- Modern Micro Console: Now Playing Module -->
-      <div class="mb-5 rounded-xl border border-amber-500/10 bg-gradient-to-b from-amber-500/[0.04] to-transparent p-4 shadow-sm relative overflow-hidden">
+      <div class="mb-4 rounded-xl border border-amber-500/10 bg-gradient-to-b from-amber-500/[0.04] to-transparent p-3.5 shadow-sm relative overflow-hidden">
         <div class="absolute top-0 right-0 h-16 w-16 bg-amber-500/[0.02] rounded-full blur-xl"></div>
         <div class="text-[9px] uppercase tracking-widest text-amber-400/70 font-black flex items-center gap-1.5">
           <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Now Rendering
         </div>
-        <div id="nowPlaying" class="mt-1.5 line-clamp-2 text-sm font-bold text-zinc-100 tracking-tight leading-snug">Nothing playing yet</div>
+        <div id="nowPlaying" class="mt-1 line-clamp-2 text-xs md:text-sm font-bold text-zinc-100 tracking-tight leading-snug">Nothing playing yet</div>
       </div>
 
       <!-- Structural High-Capacity Queue Frame Table Container -->
       <div class="flex flex-col flex-1 min-h-[220px] bg-zinc-950/40 rounded-xl border border-zinc-900 p-3">
-        <div class="mb-2.5 flex items-center justify-between px-1">
+        <div class="mb-2 flex items-center justify-between px-1">
           <div class="flex items-center gap-2">
-            <h2 class="text-xs font-black uppercase tracking-wider text-zinc-400">Up Next Queue</h2>
-            <span id="queueCount" class="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] text-amber-400 font-bold">0</span>
+            <h2 class="text-[11px] font-black uppercase tracking-wider text-zinc-400">Up Next Queue</h2>
+            <span id="queueCount" class="rounded-md bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-[9px] text-amber-400 font-bold">0</span>
           </div>
         </div>
 
         <!-- High-Capacity Scrollable Area -->
-        <div id="queueList" class="flex-1 overflow-y-auto premium-scroll pr-1 space-y-1.5 max-h-[42vh] md:max-h-none">
+        <div id="queueList" class="flex-1 overflow-y-auto premium-scroll pr-1 space-y-1.5 max-h-[38vh] md:max-h-none">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="border-b border-zinc-900 text-[10px] text-zinc-600 uppercase tracking-widest font-bold">
-                <th class="pb-2 pl-2 w-10">Pos</th>
-                <th class="pb-2 w-14 text-center">Art</th>
-                <th class="pb-2 pl-2">Title / Requested By</th>
+              <tr class="border-b border-zinc-900 text-[9px] text-zinc-600 uppercase tracking-widest font-bold">
+                <th class="pb-1.5 pl-2 w-10">Pos</th>
+                <th class="pb-1.5 w-14 text-center">Art</th>
+                <th class="pb-1.5 pl-2">Title</th>
               </tr>
             </thead>
             <tbody id="queueTableBody" class="divide-y divide-zinc-950">
@@ -212,9 +245,9 @@
       </div>
 
       <!-- Utility Control Panel Base Footer -->
-      <div class="mt-4 pt-1 grid grid-cols-2 gap-2">
+      <div class="mt-3 pt-0.5 grid grid-cols-2 gap-2">
         <button id="toggleQrBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold text-zinc-300 shadow-sm transition">
-          Open QR Code
+          Open QR Code to Connect
         </button>
         <button id="newRoomBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold text-zinc-400 shadow-sm transition">
           Change Room
@@ -344,10 +377,10 @@
 
       if (audioUnlocked) {
         btn.textContent = "🔊 Audio Output Armed";
-        btn.className = "w-full rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-3 px-4 text-xs font-bold text-emerald-400 transition cursor-default";
+        btn.className = "w-full rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 px-4 text-xs font-bold text-emerald-400 transition cursor-default";
       } else {
         btn.textContent = "🔊 Unmute Media Audio";
-        btn.className = "tv-focusable w-full rounded-xl bg-emerald-600 border border-emerald-500/40 py-3 px-4 text-xs font-bold text-white shadow-md cursor-pointer";
+        btn.className = "tv-focusable w-full rounded-xl bg-emerald-600 border border-emerald-500/40 py-2.5 px-4 text-xs font-bold text-white shadow-md cursor-pointer";
       }
     }
 
