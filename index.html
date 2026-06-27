@@ -180,9 +180,9 @@
     .suggestion-thumb { width: 58px; height: 42px; object-fit: cover; border-radius: 4px; background: #222; }
     
     /* Video Player Modal Stack */
-    .watch-player { position: sticky; top: 0; z-index: 2; background: #000; }
-    .player-frame { width: 100%; aspect-ratio: 16/9; border: 0; display: block; background: #000; }
-    .player-toolbar { position: absolute; top: 10px; left: 12px; right: 12px; display: flex; justify-content: space-between; pointer-events: none; }
+    .watch-player { position: relative; background: #000; width: 100%; aspect-ratio: 16/9; }
+    .player-frame-wrapper { width: 100%; height: 100%; background: #000; }
+    .player-toolbar { position: absolute; top: 10px; left: 12px; right: 12px; display: flex; justify-content: space-between; pointer-events: none; z-index: 30; }
     .close-player { pointer-events: auto; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; font-size: 26px; cursor: pointer; display: grid; place-items: center; }
     .watch-details { padding: 14px 16px; border-bottom: 1px solid #14141f; }
     .watch-title { font-size: 20px; line-height: 1.35; margin-bottom: 8px; font-weight: 700; }
@@ -218,6 +218,12 @@
     .skeleton-line.short { width: 50%; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+    /* Horizontal Scroller Specific Style Modifiers for Widescreen TV layouts */
+    .horizontal-scroll-grid .video-card {
+      flex: 0 0 250px !important;
+      margin-bottom: 0 !important;
+    }
+
     /* Cross-Platform Device Responsive Breakpoints Engine */
     @media (max-width: 1100px) {
       .tv-layout { grid-template-columns: minmax(0, 1fr) 300px; }
@@ -233,10 +239,6 @@
       .bottom-nav { display: none; }
       .topbar { padding-left: 24px; padding-right: 24px; }
       .shorts-grid { grid-template-columns: repeat(4, 1fr); }
-      #videoGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px 24px; }
-    }
-    @media (min-width: 1200px) {
-      #videoGrid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -397,11 +399,11 @@
         </section>
       </header>
 
-      <main class="max-w-[1200px] mx-auto mt-4 px-2 sm:px-4">
-        <section class="feed" id="videoGrid"></section>
-        <p class="empty" id="emptyState">No videos found. Try another search.</p>
+      <main class="max-w-[1400px] mx-auto mt-4 px-2 sm:px-4">
+        <section class="feed space-y-6" id="videoGrid"></section>
+        <p class="empty hidden text-center text-zinc-500 py-12" id="emptyState">No videos found. Try another search.</p>
         
-        <section id="shortsSection">
+        <section id="shortsSection" class="mt-8">
           <div class="shorts-header">
             <span class="flex items-center"><span class="shorts-logo">▶</span>Shorts</span>
             <span class="text-zinc-600">⋮</span>
@@ -427,38 +429,48 @@
         <div id="searchSuggestionList" class="max-w-2xl mx-auto space-y-1"></div>
       </div>
 
-      <!-- Tube Sub-Modals: Video Streaming Modal Stage -->
+      <!-- Tube Sub-Modals: Video Streaming Modal Stage (Refactored for PC/TV Columns layout view) -->
       <div class="player-modal" id="playerModal">
-        <div class="max-w-4xl mx-auto">
-          <div class="watch-player rounded-xl overflow-hidden shadow-2xl">
-            <iframe class="player-frame" id="playerFrame" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-            <div class="player-toolbar">
-              <button class="close-player tv-focusable" id="closePlayer" data-tv-focusable="true">⌄</button>
-              <button class="close-player tv-focusable" id="fullClose" data-tv-focusable="true">×</button>
+        <div class="max-w-[1350px] mx-auto lg:grid lg:grid-cols-[1fr_380px] lg:gap-6 lg:items-start">
+          
+          <!-- Left side layout column (Media frame & contextual tracking rules) -->
+          <div class="space-y-4">
+            <div class="watch-player rounded-xl overflow-hidden shadow-2xl relative bg-black aspect-video">
+              <div id="tubePlayer" class="w-full h-full"></div>
+              <div class="player-toolbar">
+                <button class="close-player tv-focusable" id="closePlayer" data-tv-focusable="true">⌄</button>
+                <button class="close-player tv-focusable" id="fullClose" data-tv-focusable="true">×</button>
+              </div>
+            </div>
+            <div class="watch-details bg-[#0c0c14] rounded-xl border border-zinc-900 p-4">
+              <h1 class="watch-title text-lg md:text-xl font-bold" id="watchTitle">Now Playing</h1>
+              <p class="meta text-zinc-400 text-sm" id="watchMeta">NZM TUBE</p>
+              <div class="watch-actions mt-3">
+                <button class="action-btn tv-focusable" id="channelBtn" data-tv-focusable="true">Channel</button>
+                <button class="action-btn tv-focusable" id="playNextBtn" data-tv-focusable="true">▶ Play next</button>
+              </div>
             </div>
           </div>
-          <div class="watch-details bg-[#0c0c14] mt-3 rounded-xl border border-zinc-900">
-            <h1 class="watch-title" id="watchTitle">Now Playing</h1>
-            <p class="meta px-4 pb-2" id="watchMeta">NZM TUBE</p>
-            <div class="watch-actions px-4 pb-4">
-              <button class="action-btn tv-focusable" id="channelBtn" data-tv-focusable="true">Channel</button>
-              <button class="action-btn tv-focusable" id="playNextBtn" data-tv-focusable="true">▶ Play next</button>
+
+          <!-- Right side layout column (Remote navigable queue and contextual rows) -->
+          <div class="space-y-4 mt-4 lg:mt-0 lg:max-h-[85vh] lg:overflow-y-auto premium-scroll lg:pr-1">
+            <div class="playlist-panel bg-[#0c0c14] rounded-xl border border-zinc-900 p-4" id="playlistPanel">
+              <div class="playlist-title-row flex justify-between items-center mb-2">
+                <h2 class="playlist-title text-base font-bold" id="playlistTitle">Queue</h2>
+                <button class="action-btn tv-focusable text-xs" id="minimizeQueueBtn" style="padding:6px 12px" data-tv-focusable="true">⌄ Minimize</button>
+                <span class="meta text-xs text-zinc-500" id="playlistCount">0 videos</span>
+              </div>
+              <p class="playlist-sub text-xs text-zinc-500 my-2" id="playlistSub">Real playlist queue loads here.</p>
+              <div class="queue-controls flex gap-3 mb-2">
+                <button class="queue-btn tv-focusable" id="loopBtn" data-tv-focusable="true">↻</button>
+                <button class="queue-btn tv-focusable" id="shuffleBtn" data-tv-focusable="true">⇄</button>
+              </div>
+              <div id="playlistQueue" class="max-h-48 overflow-y-auto premium-scroll space-y-1"></div>
             </div>
+            
+            <div class="suggested-grid grid grid-cols-1 gap-3" id="suggestedGrid"></div>
           </div>
-          <div class="playlist-panel bg-[#0c0c14] mt-3 rounded-xl border border-zinc-900" id="playlistPanel">
-            <div class="playlist-title-row">
-              <h2 class="playlist-title" id="playlistTitle">Queue</h2>
-              <button class="action-btn tv-focusable" id="minimizeQueueBtn" style="padding:7px 12px" data-tv-focusable="true">⌄ Minimize</button>
-              <span class="meta" id="playlistCount">0 videos</span>
-            </div>
-            <p class="playlist-sub text-xs text-zinc-500 my-2" id="playlistSub">Real playlist queue loads here.</p>
-            <div class="queue-controls">
-              <button class="queue-btn tv-focusable" id="loopBtn" data-tv-focusable="true">↻</button>
-              <button class="queue-btn tv-focusable" id="shuffleBtn" data-tv-focusable="true">⇄</button>
-            </div>
-            <div id="playlistQueue" class="max-h-60 overflow-y-auto premium-scroll"></div>
-          </div>
-          <div class="suggested-grid mt-4" id="suggestedGrid"></div>
+
         </div>
       </div>
 
@@ -562,7 +574,8 @@
     let selectedQueueIndex = 0;
     let isQrVisible = false;
 
-    // Tube Context Engine State
+    // Tube Context Engine State (Refactored into native YT API wrapper stack layers)
+    let tubePlayer = null;
     let latestVideos = [], latestResults = [], currentVideo = null, currentSearch = 'trending videos';
     let currentPlaylist = [], currentPlaylistTitle = 'Queue', currentPlaylistIndex = 0, loopPlaylist = false;
     let nextPageToken = '', isLoadingMore = false, minimizedVideo = null;
@@ -608,7 +621,6 @@
       const activeEl = focusables[spatialFocusIndex];
       if (activeEl) {
         activeEl.classList.add("tv-focused");
-        // Only trigger focus explicitly if active elements are not text inputs to preserve cursor position
         if (document.activeElement !== activeEl && activeEl.tagName !== "INPUT") {
           activeEl.focus({ preventScroll: true });
         }
@@ -628,7 +640,6 @@
       const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape", "Backspace"];
       if (!keys.includes(e.key)) return;
 
-      // FIX ISSUE #2: Allow typing and deleting in text inputs without tracking interruption
       if (document.activeElement && document.activeElement.tagName === "INPUT") {
         if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Backspace") {
           return;
@@ -644,14 +655,12 @@
       } else if (e.key === "Enter") {
         const focusables = getActiveFocusables();
         if (focusables[spatialFocusIndex]) {
-          // If input field, don't force click simulation loop
           if (focusables[spatialFocusIndex].tagName !== "INPUT") {
             e.preventDefault();
             focusables[spatialFocusIndex].click();
           }
         }
       } else if (e.key === "Escape" || e.key === "Backspace") {
-        // Back Navigation rules matching TV Remote specifications
         if (document.getElementById("searchOverlay").style.display === "block") {
           e.preventDefault();
           closeSearchOverlay();
@@ -662,7 +671,19 @@
       }
     });
 
-    // Handle mouse interactions gracefully without conflicts
+    // Handle orientation adjustments and full screen lock mechanics cleanly
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement) {
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+          screen.orientation.lock("landscape").catch(() => {});
+        }
+      } else {
+        if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+          screen.orientation.unlock();
+        }
+      }
+    });
+
     window.addEventListener("focusin", (e) => {
       const focusables = getActiveFocusables();
       const idx = focusables.indexOf(e.target);
@@ -723,14 +744,11 @@
       initTubeSystem();
     });
 
-    // FIX ISSUE #3: Video stops playing when you exit the Videoke Player 
     document.getElementById("videokeExitBtn").addEventListener("click", () => {
       stopVideokeListeners();
-      
       if (player && typeof player.pauseVideo === 'function') {
         player.pauseVideo();
       }
-
       document.getElementById("videokeWorkspace").classList.add("hidden");
       document.getElementById("appSelectionScreen").classList.remove("hidden");
       currentActiveApp = "selection";
@@ -738,10 +756,8 @@
       syncSpatialFocusClass();
     });
 
-    // FIX ISSUE #3: Video stops playing when you exit the NZM Tube App 
     document.getElementById("tubeExitBtn").addEventListener("click", () => {
       closeVideoPlayer();
-      
       document.getElementById("tubeWorkspace").classList.add("hidden");
       document.getElementById("appSelectionScreen").classList.remove("hidden");
       currentActiveApp = "selection";
@@ -768,7 +784,6 @@
       } else {
         createVideokeEmbedPlayer();
       }
-      
       initRoomPipeline();
     }
 
@@ -966,11 +981,15 @@
     // ==========================================
     function initTubeSystem() {
       setupTubeEventHandlers();
+      if (!window.YT || !window.YT.Player) {
+        const tag = document.createElement("script");
+        tag.src = "https://youtube.com/iframe_api";
+        document.body.appendChild(tag);
+      }
       triggerFeedSearch(currentSearch);
     }
 
     function setupTubeEventHandlers() {
-      // Input handling triggers
       document.getElementById("openSearchBtn").onclick = openSearchOverlay;
       document.getElementById("closeSearchBtn").onclick = closeSearchOverlay;
       
@@ -1005,7 +1024,6 @@
         document.getElementById("minimizeQueueBtn").textContent = panel.classList.contains("minimized") ? "⌃ Show queue" : "⌄ Minimize";
       };
 
-      // Handle Chips clicks
       document.querySelectorAll("#chipsContainer .chip").forEach(chip => {
         chip.onclick = () => {
           document.querySelectorAll("#chipsContainer .chip").forEach(c => c.classList.remove("active"));
@@ -1014,12 +1032,10 @@
         };
       });
 
-      // Handle Bottom Item clicks
       document.querySelectorAll(".bottom-nav .bottom-item[data-search]").forEach(item => {
         item.onclick = () => { triggerFeedSearch(item.dataset.search); };
       });
 
-      // Continuous infinite scroll monitoring hook
       window.onscroll = () => {
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
           loadMoreTubeResults();
@@ -1028,8 +1044,8 @@
     }
 
     function showTubeSkeleton() {
-      document.getElementById("videoGrid").innerHTML = Array.from({ length: 6 }).map(() => `
-        <div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      document.getElementById("videoGrid").innerHTML = Array.from({ length: 4 }).map(() => `
+        <div class="p-4"><div class="skeleton-thumb"></div><div class="skeleton-line"></div></div>
       `).join('');
       document.getElementById("emptyState").style.display = 'none';
     }
@@ -1072,7 +1088,7 @@
       const url = new URL('https://www.googleapis.com/youtube/v3/search');
       url.searchParams.set('part', 'snippet');
       url.searchParams.set('type', 'video,playlist');
-      url.searchParams.set('maxResults', '18');
+      url.searchParams.set('maxResults', '12');
       url.searchParams.set('q', query);
       if (pageToken) url.searchParams.set('pageToken', pageToken);
 
@@ -1083,29 +1099,68 @@
       const details = await retrieveVideoDetails(videoIds);
       const detailsMap = new Map(details.map(v => [v.id, v]));
 
-      const mappedResults = (data.items || []).map(item => {
+      return (data.items || []).map(item => {
         if (item.id?.kind === 'youtube#playlist') return { kind: 'playlist', playlistId: item.id.playlistId, snippet: item.snippet };
         const v = detailsMap.get(item.id?.videoId);
         return v ? { kind: 'video', video: v } : null;
       }).filter(Boolean);
-
-      return mappedResults;
     }
 
+    // Dynamic UI processing mapping architecture split depending on mobile portrait vs landscape rows layout 
     async function triggerFeedSearch(q) {
       currentSearch = q;
       nextPageToken = '';
       showTubeSkeleton();
+      
+      const grid = document.getElementById("videoGrid");
       try {
-        latestResults = await executeSearchQueryPipeline(q);
-        latestVideos = latestResults.filter(r => r.kind === 'video').map(r => r.video);
-        renderFeedGrid(latestResults);
-        renderShortsModule(latestVideos);
+        if (q === 'trending videos' && window.innerWidth > 820) {
+          // TV Widescreen multi-row categories rendering setup layout mode tracking mechanics
+          grid.innerHTML = '';
+          grid.className = "feed space-y-8";
+          document.getElementById("emptyState").style.display = 'none';
+          
+          const categories = [
+            { title: "Trending Mixes", query: "trending videos" },
+            { title: "Premium Music", query: "youtube music playlist mix" },
+            { title: "Gaming Stream Logs", query: "gaming playlist mix" },
+            { title: "Technology Reviews", query: "technology reviews" }
+          ];
+          
+          for (const cat of categories) {
+            const results = await executeSearchQueryPipeline(cat.query);
+            const videos = results.filter(r => r.kind === 'video').map(r => r.video);
+            if (!latestVideos.length) latestVideos = videos;
+            
+            const rowSection = document.createElement("div");
+            rowSection.className = "category-row-wrapper w-full";
+            rowSection.innerHTML = `
+              <h2 class="text-lg font-black tracking-tight mb-2 px-2 text-amber-400/90 uppercase text-xs">${cat.title}</h2>
+              <div class="flex flex-nowrap overflow-x-auto gap-4 premium-scroll pb-3 horizontal-scroll-grid">
+                ${results.map(r => buildCardHtml(r)).join('')}
+              </div>
+            `;
+            grid.appendChild(rowSection);
+          }
+          setupCardClicks();
+          renderShortsModule(latestVideos);
+        } else {
+          // Standard unified grid display layout flow pipeline configuration
+          grid.className = "feed grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+          latestResults = await executeSearchQueryPipeline(q);
+          latestVideos = latestResults.filter(r => r.kind === 'video').map(r => r.video);
+          
+          if (!latestResults.length) { displayTubeError("No data matches found."); return; }
+          document.getElementById("emptyState").style.display = 'none';
+          grid.innerHTML = latestResults.map(r => buildCardHtml(r)).join('');
+          setupCardClicks();
+          renderShortsModule(latestVideos);
+        }
       } catch (err) { displayTubeError(err.message); }
     }
 
     async function loadMoreTubeResults() {
-      if (!nextPageToken || isLoadingMore || document.getElementById("playerModal").style.display === 'block') return;
+      if (!nextPageToken || isLoadingMore || document.getElementById("playerModal").style.display === 'block' || currentSearch === 'trending videos') return;
       isLoadingMore = true;
       try {
         const more = await executeSearchQueryPipeline(currentSearch, nextPageToken);
@@ -1114,8 +1169,9 @@
         
         const wrapper = document.createElement("div");
         wrapper.innerHTML = more.map(r => buildCardHtml(r)).join('');
+        const grid = document.getElementById("videoGrid");
         while (wrapper.firstChild) {
-          document.getElementById("videoGrid").appendChild(wrapper.firstChild);
+          grid.appendChild(wrapper.firstChild);
         }
         setupCardClicks();
       } catch (e) { console.error(e); }
@@ -1135,7 +1191,7 @@
               <div class="avatar">${channel.slice(0,2).toUpperCase()}</div>
               <div><h3 class="video-title">${title}</h3><p class="meta">${channel}</p></div>
             </div>
-            <div class="summary-card"><span>◉ Load Playlist Queue</span><span>▶</span></div>
+            <div class="summary-card"><span>◉ Load Playlist</span><span>▶</span></div>
           </article>
         `;
       } else {
@@ -1144,7 +1200,6 @@
         const channel = esc(v.snippet.channelTitle);
         const thumb = v.snippet.thumbnails?.medium?.url || '';
         
-        // Match standard ISO-8601 duration string patterns
         const durationMatch = (v.contentDetails?.duration || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
         let timeStr = "Play";
         if (durationMatch) {
@@ -1167,14 +1222,6 @@
       }
     }
 
-    function renderFeedGrid(results) {
-      const grid = document.getElementById("videoGrid");
-      if (!results.length) { displayTubeError("No content matches found."); return; }
-      document.getElementById("emptyState").style.display = 'none';
-      grid.innerHTML = results.map(r => buildCardHtml(r)).join('');
-      setupCardClicks();
-    }
-
     function setupCardClicks() {
       document.querySelectorAll("#videoGrid .video-card").forEach(card => {
         card.onclick = () => {
@@ -1190,19 +1237,18 @@
 
     function renderShortsModule(videos) {
       const target = videos.length ? videos : latestVideos;
-      document.getElementById("shortsGrid").innerHTML = target.slice(0, 4).map((v, i) => `
-        <article class="short-card tv-focusable" data-tv-focusable="true" tabindex="0" onclick="triggerSinglePlayback('${v.id}','','','')">
-          ${i % 2 === 0 ? '<span class="new-badge">New</span>' : ''}
+      document.getElementById("shortsGrid").innerHTML = target.slice(0, 4).map((v) => `
+        <article class="short-card tv-focusable" data-id="${v.id}" data-tv-focusable="true" tabindex="0">
+          <span class="new-badge">Shorts</span>
           <img src="${v.snippet.thumbnails?.medium?.url || ''}" alt=""/>
           <div class="short-title">${v.snippet.title}</div>
         </article>
       `).join('');
       
       document.querySelectorAll("#shortsGrid .short-card").forEach(card => {
-        card.addEventListener("click", () => {
-          const id = card.getAttribute("onclick").match(/'([^']+)'/)[1];
-          triggerSinglePlayback(id, 'Shorts Stream', 'NZM Tube', '');
-        });
+        card.onclick = () => {
+          triggerSinglePlayback(card.dataset.id, 'Shorts View', 'NZM Tube', '');
+        };
       });
       syncSpatialFocusClass();
     }
@@ -1210,12 +1256,12 @@
     async function triggerPlaylistExtraction(pid, name) {
       document.getElementById("playerModal").style.display = 'block';
       document.getElementById("playlistTitle").textContent = name;
-      document.getElementById("playlistQueue").innerHTML = '<p class="p-4 text-xs text-zinc-500">Extracting Playlist Sequence Items...</p>';
+      document.getElementById("playlistQueue").innerHTML = '<p class="p-4 text-xs text-zinc-500">Extracting Tracks Sequence Items...</p>';
       
       const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems');
       url.searchParams.set('part', 'snippet,contentDetails');
       url.searchParams.set('playlistId', pid);
-      url.searchParams.set('maxResults', '40');
+      url.searchParams.set('maxResults', '35');
 
       try {
         const data = await rotatedYoutubeFetch(url);
@@ -1224,7 +1270,7 @@
         currentPlaylistTitle = name;
         currentPlaylistIndex = 0;
         if (!currentPlaylist.length) {
-          document.getElementById("playlistQueue").innerHTML = '<p class="p-4 text-xs text-rose-400">No streamable tracks isolated.</p>';
+          document.getElementById("playlistQueue").innerHTML = '<p class="p-4 text-xs text-rose-400">No streamable tracks found.</p>';
           return;
         }
         launchTrackPlayerIndex(0);
@@ -1248,10 +1294,10 @@
       buildQueueUiDom();
     }
 
+    // Refactored to leverage full cross origin JavaScript API state listener event loops handles 
     function executeVideoLoad(id, title, channel) {
       currentVideo = { videoId: id, title, channel };
       
-      // Save item securely inside recent watch history array state structures
       let historyArr = [];
       try { historyArr = JSON.parse(localStorage.getItem("nzmTubeHistory") || "[]"); } catch (e) {}
       historyArr = historyArr.filter(x => x.id !== id);
@@ -1260,9 +1306,28 @@
 
       document.getElementById("watchTitle").textContent = title;
       document.getElementById("watchMeta").textContent = `${channel} · NZM TUBE`;
-      document.getElementById("playerFrame").src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+      
       document.getElementById("playerModal").style.display = 'block';
       document.getElementById("miniPlayer").style.display = 'none';
+      
+      if (!tubePlayer) {
+        tubePlayer = new YT.Player("tubePlayer", {
+          width: "100%", height: "100%",
+          videoId: id,
+          playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, enablejsapi: 1 },
+          events: {
+            onReady: (e) => { e.target.playVideo(); },
+            onStateChange: (e) => {
+              // Core feature hook tracking playback completion triggers automated queue skips smoothly
+              if (e.data === YT.PlayerState.ENDED) {
+                playNextSuggestedTrack();
+              }
+            }
+          }
+        });
+      } else {
+        tubePlayer.loadVideoById({ videoId: id, startSeconds: 0 });
+      }
       
       spatialFocusIndex = 0;
       syncSpatialFocusClass();
@@ -1289,7 +1354,7 @@
 
       document.getElementById("suggestedGrid").innerHTML = currentPlaylist
         .filter((_, idx) => idx !== currentPlaylistIndex)
-        .slice(0, 10)
+        .slice(0, 8)
         .map(v => buildCardHtml({ kind: 'video', video: v }))
         .join('');
         
@@ -1316,7 +1381,9 @@
     }
 
     function closeVideoPlayer() {
-      document.getElementById("playerFrame").src = '';
+      if (tubePlayer && typeof tubePlayer.stopVideo === 'function') {
+        tubePlayer.stopVideo();
+      }
       document.getElementById("playerModal").style.display = 'none';
       document.getElementById("miniPlayer").style.display = 'none';
       spatialFocusIndex = 0;
@@ -1345,7 +1412,7 @@
       url.searchParams.set('part', 'snippet');
       url.searchParams.set('type', 'video');
       url.searchParams.set('videoEmbeddable', 'true');
-      url.searchParams.set('maxResults', '20');
+      url.searchParams.set('maxResults', '15');
       url.searchParams.set('channelId', cid);
 
       try {
@@ -1353,8 +1420,13 @@
         const ids = (data.items || []).map(v => v.id?.videoId).filter(Boolean);
         latestVideos = await retrieveVideoDetails(ids);
         latestResults = latestVideos.map(v => ({ kind: 'video', video: v }));
-        renderFeedGrid(latestResults);
-      } catch (err) { displayTubeError("Could not retrieve channel feed information data sheets."); }
+        
+        const grid = document.getElementById("videoGrid");
+        grid.className = "feed grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+        document.getElementById("emptyState").style.display = 'none';
+        grid.innerHTML = latestResults.map(r => buildCardHtml(r)).join('');
+        setupCardClicks();
+      } catch (err) { displayTubeError("Could not retrieve channel items feed logs."); }
     }
 
     function renderWatchHistoryView() {
@@ -1368,7 +1440,11 @@
         displayTubeError("No watch history records stored locally.");
         return;
       }
-      renderFeedGrid(latestResults);
+      const grid = document.getElementById("videoGrid");
+      grid.className = "feed grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6";
+      document.getElementById("emptyState").style.display = 'none';
+      grid.innerHTML = latestResults.map(r => buildCardHtml(r)).join('');
+      setupCardClicks();
     }
 
     function renderSearchSuggestions(filter = '') {
@@ -1395,7 +1471,7 @@
       document.getElementById("overlaySearchInput").value = '';
       renderSearchSuggestions('');
       document.getElementById("overlaySearchInput").focus();
-      spatialFocusIndex = 1; // Position directly into text input field node focus bounding box
+      spatialFocusIndex = 1;
       syncSpatialFocusClass();
     }
 
@@ -1412,7 +1488,7 @@
 
     function startVoiceEngine() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) { alert("Voice feature unsupported inside this structural client engine architecture."); return; }
+      if (!SpeechRecognition) { alert("Voice engine architecture unsupported within this layout environment client."); return; }
       const rec = new SpeechRecognition();
       rec.lang = 'en-US';
       const btn = document.getElementById("voiceSearchBtn");
