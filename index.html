@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NZM Videoke TV Player</title>
+  <title>NZM Unified Media Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
@@ -12,8 +12,9 @@
       width: 100%;
       height: 100%;
       background: #08080c;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     /* Premium Metallic Gold Accent gradient */
@@ -21,44 +22,12 @@
       background: linear-gradient(135deg, #e5a93b 0%, #fff2a1 50%, #b88219 100%);
     }
 
-    /* Modern Frosted Dark Glass Panel Styling */
+    /* Frosted Dark Glass Panel Styling */
     .panel-glass {
       background: rgba(13, 13, 18, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-left: 1px solid rgba(229, 169, 59, 0.12);
-    }
-
-    #player {
-      width: 100%;
-      height: 100%;
-    }
-
-    #qrCode img,
-    #qrCode canvas {
-      width: 130px !important;
-      height: 130px !important;
-      border-radius: 8px;
-    }
-
-    .tv-layout {
-      grid-template-columns: minmax(0, 1fr) 360px;
-    }
-
-    /* Custom Premium Scrollbar styling for high-capacity list */
-    .premium-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-    .premium-scroll::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.02);
-      border-radius: 10px;
-    }
-    .premium-scroll::-webkit-scrollbar-thumb {
-      background: rgba(229, 169, 59, 0.25);
-      border-radius: 10px;
-    }
-    .premium-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(229, 169, 59, 0.5);
     }
 
     /* Fully Furnished Focus Interactivity engine */
@@ -68,715 +37,441 @@
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Focused styling across active remotes/keyboards */
-    .tv-focusable:focus,
-    .tv-focusable.tv-focused {
-      transform: scale(1.025);
-      background-color: rgba(229, 169, 59, 0.15) !important;
-      border-color: rgba(255, 218, 107, 0.8) !important;
-      box-shadow: 0 0 20px rgba(229, 169, 59, 0.25), inset 0 0 0 1px rgba(255, 218, 107, 0.2);
+    /* Unified Focused styling across remotes/keyboards */
+    .tv-focusable:focus, .tv-focusable.tv-focused {
+      transform: scale(1.04);
+      background-color: rgba(229, 169, 59, 0.2) !important;
+      border-color: rgba(255, 218, 107, 0.9) !important;
+      box-shadow: 0 0 22px rgba(229, 169, 59, 0.35), inset 0 0 0 1px rgba(255, 218, 107, 0.3);
+      z-index: 10;
     }
 
-    @media (max-width: 1100px) {
-      .tv-layout {
-        grid-template-columns: minmax(0, 1fr) 300px;
-      }
+    /* Custom Scrollbar styling */
+    .premium-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .premium-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .premium-scroll::-webkit-scrollbar-thumb { background: rgba(229, 169, 59, 0.25); border-radius: 10px; }
+
+    #player { width: 100%; height: 100%; }
+    #qrCode img, #qrCode canvas { width: 130px !important; height: 130px !important; border-radius: 8px; }
+
+    /* App layout configurations */
+    .tv-layout { grid-template-columns: minmax(0, 1fr) 360px; }
+    
+    /* Tube specific styling overrides */
+    .thumbnail { position: relative; aspect-ratio: 16/9; overflow: hidden; background: #222; }
+    .thumbnail img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .duration { position: absolute; right: 8px; bottom: 8px; padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,.8); font-size: 11px; }
+
+    /* Skeleton Loading animations */
+    .skeleton-card { margin-bottom: 24px; }
+    .skeleton-thumb { aspect-ratio: 16/9; background: linear-gradient(90deg,#202020,#303030,#202020); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+    @media (max-width: 1024px) {
+      .tv-layout { grid-template-columns: minmax(0, 1fr) 300px; }
     }
 
-    /* Deep Optimization for Mobile and Small Tablet Screen Real Estate */
-    @media (max-width: 760px) {
-      html, body {
-        overflow: auto;
-      }
-
-      .tv-layout {
-        min-height: 100vh;
-        display: flex !important;
-        flex-direction: column;
-      }
-
-      .player-section {
-        height: 35vh;
-        min-height: 220px;
-      }
-
-      .side-panel {
-        height: auto !important;
-        flex: 1 0 auto;
-        border-left: none;
-        border-top: 1px solid rgba(229, 169, 59, 0.12);
-        padding: 1rem !important;
-      }
-
-      /* Login Responsiveness Adjustments */
-      .login-card {
-        padding: 1.5rem !important;
-        width: 88vw !important;
-      }
-      .login-title {
-        font-size: 1.5rem !important;
-      }
-      .login-logo {
-        height: 2.75rem !important;
-        width: 2.75rem !important;
-        font-size: 1.25rem !important;
-        margin-bottom: 0.75rem !important;
-      }
-
-      /* Player Idle State Fonts / Logo Responsiveness */
-      .player-logo {
-        font-size: 3rem !important;
-      }
-      .player-title {
-        font-size: 1.5rem !important;
-        letter-spacing: 0.05em !important;
-      }
-      .player-subtitle {
-        font-size: 0.75rem !important;
-        letter-spacing: 0.05em !important;
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
+    @media (max-width: 768px) {
+      .tv-layout { display: flex !important; flex-direction: column; }
+      .player-section { height: 40vh; min-height: 240px; }
+      .side-panel { height: auto !important; border-left: none; border-top: 1px solid rgba(229, 169, 59, 0.12); }
     }
   </style>
 </head>
-<body class="text-zinc-100 antialiased">
+<body class="text-zinc-100 antialiased premium-scroll">
 
-  <!-- Premium Login Overlay -->
+  <!-- Step 1: Premium Login Overlay -->
   <div id="loginScreen" class="fixed inset-0 z-50 grid place-items-center bg-[#050508]/98 backdrop-blur-md">
-    <div class="login-card w-[90vw] max-w-md rounded-2xl border border-amber-500/15 bg-zinc-950/80 p-8 shadow-2xl shadow-amber-500/5 text-center transition-all">
-      <div class="login-logo inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 mb-4 text-2xl shadow-inner text-amber-400">🎤</div>
-      <h1 class="login-title mb-1 text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">NZM VIDEOKE</h1>
-      <p class="mb-5 text-[11px] font-medium text-zinc-500 tracking-wide uppercase">To Login just add @nzm.local to your Username</p>
+    <div class="w-[90vw] max-w-md rounded-2xl border border-amber-500/15 bg-zinc-950/80 p-8 shadow-2xl text-center">
+      <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 mb-4 text-2xl text-amber-400">🎤</div>
+      <h1 class="mb-1 text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-400">NZM MEDIA HUB</h1>
+      <p class="mb-5 text-[11px] font-medium text-zinc-500 tracking-wide uppercase">Add @nzm.local to your Username</p>
 
       <div class="space-y-2.5 mb-5 text-left">
-        <input id="emailInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Email Address" type="email" />
-        <input id="passwordInput" class="w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:outline-none focus:border-amber-500/40 transition" placeholder="Password" type="password" />
+        <input id="emailInput" class="tv-focusable w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:border-amber-500/40" placeholder="Email Address" type="email" data-tv-focusable="true" />
+        <input id="passwordInput" class="tv-focusable w-full rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-sm text-white focus:border-amber-500/40" placeholder="Password" type="password" data-tv-focusable="true" />
       </div>
 
-      <button id="loginBtn" class="gold-gradient w-full rounded-xl p-3.5 font-bold text-zinc-950 shadow-lg shadow-amber-500/10 hover:opacity-95 transition active:scale-[0.99]">Login</button>
+      <button id="loginBtn" class="tv-focusable gold-gradient w-full rounded-xl p-3.5 font-bold text-zinc-950 shadow-lg" data-tv-focusable="true">Login</button>
       <p id="loginError" class="min-h-5 mt-3 text-center text-xs font-semibold text-rose-400"></p>
     </div>
   </div>
 
-  <!-- Primary Interface -->
-  <main id="app" class="tv-layout grid h-screen w-full">
-    
-    <!-- Left Screen Frame: Theater Stage -->
-    <section class="player-section relative bg-black shadow-inner">
+  <!-- Step 2: Dashboard App Selector Mode -->
+  <div id="selectorScreen" class="fixed inset-0 z-40 hidden grid place-items-center bg-[#07070a] p-6">
+    <div class="max-w-4xl w-full text-center">
+      <h2 class="text-3xl md:text-5xl font-black mb-2 tracking-tight text-zinc-200">CHOOSE ENTERTAINMENT</h2>
+      <p class="text-amber-400/70 font-semibold tracking-widest text-xs uppercase mb-12">Select your optimized playback engine</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+        <button id="chooseVideoke" class="tv-focusable flex flex-col items-center justify-center p-8 bg-zinc-900/60 border border-zinc-800 rounded-2xl group transition" data-tv-focusable="true">
+          <div class="text-6xl mb-4 group-hover:animate-bounce">🎤</div>
+          <span class="text-2xl font-black text-amber-400">VIDEOKE PLAYER</span>
+          <span class="text-xs text-zinc-400 mt-2">Dual display room streaming engine</span>
+        </button>
+
+        <button id="chooseTube" class="tv-focusable flex flex-col items-center justify-center p-8 bg-zinc-900/60 border border-zinc-800 rounded-2xl group transition" data-tv-focusable="true">
+          <div class="text-6xl mb-4 group-hover:animate-bounce">📺</div>
+          <span class="text-2xl font-black text-red-500">NZM TUBE</span>
+          <span class="text-xs text-zinc-400 mt-2">Personal customized smart feed content</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module A: Videoke Player Interface -->
+  <div id="videokeApp" class="hidden tv-layout grid h-screen w-full">
+    <section class="player-section relative bg-black">
       <div id="playerShell" class="relative h-full w-full bg-black">
         <div id="player"></div>
-        
-        <!-- Premium Idle State Layout -->
-        <div id="playerPlaceholder" class="absolute inset-0 flex flex-col justify-start pt-[12vh] sm:justify-center sm:pt-0 items-center bg-radial from-zinc-900 to-black text-center p-6 z-10 pointer-events-none">
-          <div class="space-y-2 md:space-y-4 max-w-xs sm:max-w-md">
-            <div class="player-logo animate-bounce inline-block text-6xl md:text-7xl bg-clip-text drop-shadow-[0_10px_10px_rgba(229,169,59,0.2)]">🎤</div>
-            <div class="mx-auto h-px w-20 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent"></div>
-            <p class="player-subtitle text-xs md:text-sm font-medium text-amber-200/60 tracking-widest uppercase">Awaiting Song Requests from Remote Control Panel</p>
+        <div id="playerPlaceholder" class="absolute inset-0 flex flex-col justify-center items-center bg-zinc-950 text-center p-6 z-10">
+          <div class="space-y-4">
+            <div class="text-7xl animate-bounce">🎤</div>
+            <p class="text-sm font-medium text-amber-200/60 tracking-widest uppercase">Awaiting Song Requests from Remote Control Panel</p>
           </div>
         </div>
       </div>
-
-      <!-- Toast Stream Monitor Status -->
-      <div class="pointer-events-none absolute left-4 top-4 md:left-6 md:top-6 flex items-center gap-2 rounded-full bg-zinc-950/80 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2.5 text-[11px] md:text-xs font-medium text-amber-200/90 shadow-xl border border-zinc-800/80">
-        <span class="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-emerald-500"></span>
-        </span>
-        <span id="statusText" class="tracking-wide">System Idle</span>
+      <div class="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-zinc-950/80 px-4 py-2 text-xs font-medium border border-zinc-800">
+        <span class="relative flex h-2 w-2"><span class="animate-ping absolute h-full w-full rounded-full bg-emerald-400"></span><span class="rounded-full h-2 w-2 bg-emerald-500"></span></span>
+        <span id="statusText">System Idle</span>
       </div>
     </section>
 
-    <!-- Right Side Panel Component Framework -->
-    <aside id="sidePanel" class="side-panel panel-glass flex h-screen flex-col p-5 overflow-y-auto premium-scroll">
-      
-      <!-- Brand Segment Header -->
+    <aside class="side-panel panel-glass flex h-screen flex-col p-5 overflow-y-auto premium-scroll">
       <div class="mb-4 flex items-center justify-between">
-        <div>
-          <h1 class="text-lg md:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 to-zinc-400">NZM VIDEOKE</h1>
-        </div>
-        <div id="roomCodeText" class="text-xs md:text-sm font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md tracking-widest">----</div>
+        <h1 class="text-lg font-black tracking-tight text-amber-400">NZM VIDEOKE</h1>
+        <div id="roomCodeText" class="text-xs font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">----</div>
       </div>
 
-      <!-- Action Framework Commands -->
       <div class="space-y-2 mb-3">
-        <button id="enableAudioBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 px-4 text-xs font-bold text-emerald-400 shadow-sm flex items-center justify-center gap-2">
-          <span class="text-sm">🔊</span> Enable Media Audio
-        </button>
+        <button id="enableAudioBtn" class="tv-focusable w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2.5 px-4 text-xs font-bold text-emerald-400 flex items-center justify-center gap-2" data-tv-focusable="true">💡 Enable Media Audio</button>
       </div>
 
-      <!-- Modern Micro Console: Now Playing Module -->
-      <div class="mb-4 rounded-xl border border-amber-500/10 bg-gradient-to-b from-amber-500/[0.04] to-transparent p-3.5 shadow-sm relative overflow-hidden">
-        <div class="absolute top-0 right-0 h-16 w-16 bg-amber-500/[0.02] rounded-full blur-xl"></div>
-        <div class="text-[9px] uppercase tracking-widest text-amber-400/70 font-black flex items-center gap-1.5">
-          <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Now Rendering
-        </div>
-        <div id="nowPlaying" class="mt-1 line-clamp-2 text-xs md:text-sm font-bold text-zinc-100 tracking-tight leading-snug">Nothing playing yet</div>
+      <div class="mb-4 rounded-xl border border-amber-500/10 bg-zinc-900/40 p-3.5">
+        <div class="text-[9px] uppercase tracking-widest text-amber-400 font-black">Now Rendering</div>
+        <div id="nowPlaying" class="mt-1 text-sm font-bold text-zinc-100 truncate">Nothing playing yet</div>
       </div>
 
-      <!-- Structural High-Capacity Queue Frame Table Container -->
-      <div class="flex flex-col flex-1 min-h-[220px] bg-zinc-950/40 rounded-xl border border-zinc-900 p-3">
-        <div class="mb-2 flex items-center justify-between px-1">
-          <div class="flex items-center gap-2">
-            <h2 class="text-[11px] font-black uppercase tracking-wider text-zinc-400">Up Next Queue</h2>
-            <span id="queueCount" class="rounded-md bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 text-[9px] text-amber-400 font-bold">0</span>
-          </div>
-        </div>
-
-        <!-- High-Capacity Scrollable Area -->
-        <div id="queueList" class="flex-1 overflow-y-auto premium-scroll pr-1 space-y-1.5 max-h-[38vh] md:max-h-none">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-zinc-900 text-[9px] text-zinc-600 uppercase tracking-widest font-bold">
-                <th class="pb-1.5 pl-2 w-10">Pos</th>
-                <th class="pb-1.5 w-14 text-center">Art</th>
-                <th class="pb-1.5 pl-2">Title</th>
-              </tr>
-            </thead>
-            <tbody id="queueTableBody" class="divide-y divide-zinc-950">
-              <tr>
-                <td colspan="3" class="py-12 text-center text-xs font-medium text-zinc-600">No songs currently lined up</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
+      <div class="flex flex-col flex-1 min-h-[200px] bg-zinc-950/40 rounded-xl border border-zinc-900 p-3">
+        <div class="mb-2 flex items-center justify-between"><h2 class="text-[11px] font-black uppercase tracking-wider text-zinc-400">Up Next Queue</h2><span id="queueCount" class="rounded bg-zinc-900 px-1.5 py-0.5 text-[9px] text-amber-400 font-bold">0</span></div>
+        <div class="flex-1 overflow-y-auto premium-scroll"><table class="w-full text-left"><tbody id="queueTableBody"></tbody></table></div>
       </div>
 
-      <!-- Utility Control Panel Base Footer -->
-      <div class="mt-3 pt-0.5 grid grid-cols-2 gap-2">
-        <button id="toggleQrBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold text-zinc-300 shadow-sm transition">
-          Open QR Code to Connect
-        </button>
-        <button id="newRoomBtn" tabindex="0" data-tv-focusable="true" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold text-zinc-400 shadow-sm transition">
-          Change Room
-        </button>
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <button id="toggleQrBtn" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold" data-tv-focusable="true">Toggle QR</button>
+        <button id="backToMenuFromV" class="tv-focusable w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 text-[11px] font-bold text-rose-400" data-tv-focusable="true">Main Menu</button>
       </div>
-
-      <!-- QR Flyout Deck Card Container -->
-      <div id="qrCardWrapper" class="hidden mt-3 rounded-xl border border-zinc-800 bg-white p-3 mx-auto shadow-2xl transition">
-        <div id="qrCode" class="bg-white"></div>
-      </div>
+      <div id="qrCardWrapper" class="hidden mt-3 rounded-xl bg-white p-3 mx-auto"><div id="qrCode"></div></div>
     </aside>
-  </main>
+  </div>
+
+  <!-- Module B: NZM Tube Interface -->
+  <div id="tubeApp" class="hidden min-h-screen flex flex-col bg-[#0f0f0f]">
+    <header class="p-4 bg-[#0f0f0f] border-b border-zinc-900 sticky top-0 z-30">
+      <div class="flex items-center justify-between gap-4 max-w-6xl mx-auto">
+        <div class="flex items-center gap-2 text-2xl font-black"><span class="bg-red-600 px-2.5 py-0.5 rounded-lg text-lg">▶</span> NZM TUBE</div>
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <input id="tubeSearchInput" class="tv-focusable w-full bg-zinc-900 text-sm rounded-full px-4 py-2 border border-zinc-800 focus:border-red-600" placeholder="Search content..." data-tv-focusable="true" />
+          <button id="tubeSearchBtn" class="tv-focusable bg-zinc-800 px-4 py-2 rounded-full text-sm font-bold" data-tv-focusable="true">Go</button>
+        </div>
+        <button id="backToMenuFromT" class="tv-focusable bg-zinc-900 border border-zinc-800 text-xs px-3 py-2 rounded-xl text-rose-400 font-bold" data-tv-focusable="true">Menu</button>
+      </div>
+      <div id="tubeChips" class="flex gap-2 overflow-x-auto premium-scroll py-3 max-w-6xl mx-auto"></div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4">
+      <div id="tubeGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      <p id="tubeEmpty" class="hidden text-center text-zinc-500 py-12">No search matching results found.</p>
+    </main>
+
+    <!-- Tube Overlay Watching Modal -->
+    <div id="tubePlayerModal" class="fixed inset-0 bg-black/95 hidden z-50 flex flex-col md:flex-row">
+      <div class="flex-1 bg-black flex flex-col justify-center relative">
+        <iframe id="tubeFrame" class="w-full aspect-ratio-[16/9] md:h-full border-0" allow="autoplay; fullscreen"></iframe>
+        <button id="closeTubePlayer" class="tv-focusable absolute top-4 left-4 bg-black/60 border border-zinc-800 px-4 py-2 rounded-full font-bold" data-tv-focusable="true">✕ Close Player</button>
+      </div>
+      <div class="w-full md:w-80 bg-zinc-950 p-4 overflow-y-auto premium-scroll border-t md:border-t-0 md:border-l border-zinc-900">
+        <h3 id="tubeWatchTitle" class="text-base font-bold mb-2">Title</h3>
+        <p id="tubeWatchMeta" class="text-xs text-zinc-400 mb-4">Meta info</p>
+        <div class="border-t border-zinc-900 pt-4"><h4 class="text-xs uppercase text-zinc-500 font-bold mb-2">Up Next Mix</h4><div id="tubeNextQueue" class="space-y-2"></div></div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      onChildAdded,
-      onValue,
-      set,
-      remove,
-      get,
-      update,
-      off
-    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getDatabase, ref, onChildAdded, onValue, set, remove, get, update, off } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
+    // Configuration Matrix
     const firebaseConfig = {
       apiKey: "AIzaSyCFUZe8BZKPzU5E_es0Gv5xsqkliB3tTes",
       authDomain: "admin-panel-87530.firebaseapp.com",
       databaseURL: "https://admin-panel-87530-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "admin-panel-87530",
-      storageBucket: "admin-panel-87530.firebasestorage.app",
-      messagingSenderId: "1065643470010",
-      appId: "1:1065643470010:web:ea79e85fef283dfb05a683",
-      measurementId: "G-YSCLM1KL0Z"
     };
+    const YOUTUBE_API_KEY = "AIzaSyDZ_1Vx2llR5p-NWgvMTUEXKeZlPmKoU7A";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    const params = new URLSearchParams(location.search);
-    let roomId = params.get("room") || localStorage.getItem("nzmRoom") || makeRoomId();
+    const fbApp = initializeApp(firebaseConfig);
+    const auth = getAuth(fbApp);
+    const db = getDatabase(fbApp);
 
     let currentUser = null;
-    let player = null;
+    let roomId = localStorage.getItem("nzmRoom") || Math.random().toString(36).slice(2, 8).toUpperCase();
+    let vPlayer = null;
     let playerReady = false;
-    let hasLoadedVideo = false;
-    let currentVideoId = null;
     let audioUnlocked = localStorage.getItem("nzmAudioUnlocked") === "1";
-    let queueListenerRef = null;
-    let commandsListenerRef = null;
-    const processedCommands = new Set();
-    let tvQueueItems = [];
-    let selectedQueueIndex = 0;
-    let sidePanelFocusIndex = 0;
-    let isQrVisible = false;
+    let tubeVideos = [];
+    let activeAppMode = "selector"; // 'selector', 'videoke', 'tube'
 
-    window.onYouTubeIframeAPIReady = () => {
-      player = new YT.Player("player", {
-        width: "100%",
-        height: "100%",
-        playerVars: {
-          autoplay: 1,
-          controls: 1,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          enablejsapi: 1
-        },
-        events: {
-          onReady: () => {
-            playerReady = true;
-            updateEnableAudioButton();
-            setStatus(audioUnlocked ? "Ready. Sound Linked." : "Ready. Click Audio Enable Pin.");
-          },
-          onStateChange: (event) => {
-            if (event.data === YT.PlayerState.ENDED) {
-              playNextSong();
-            }
-          },
-          onError: () => {
-            setStatus("Format stream missing error. Skip triggered.");
-          }
+    // Smart Cross-App TV Spatial Navigation Engine
+    let focusableElements = [];
+    let currentFocusIndex = 0;
+
+    function refreshSpatialTargets() {
+      focusableElements = [...document.querySelectorAll("[data-tv-focusable='true']")]
+        .filter(el => {
+          let parent = el.closest('#loginScreen, #selectorScreen, #videokeApp, #tubeApp, #tubePlayerModal');
+          if (!parent) return true;
+          return !parent.classList.contains('hidden') && parent.style.display !== 'none';
+        });
+      
+      if (focusableElements.length > 0) {
+        if (currentFocusIndex >= focusableElements.length) currentFocusIndex = 0;
+        applyFocusFeedback();
+      }
+    }
+
+    function applyFocusFeedback() {
+      document.querySelectorAll(".tv-focused").forEach(el => el.classList.remove("tv-focused"));
+      const currentTarget = focusableElements[currentFocusIndex];
+      if (currentTarget) {
+        currentTarget.focus({ preventScroll: false });
+        currentTarget.classList.add("tv-focused");
+        currentTarget.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      const activeKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Backspace", "Escape"];
+      if (!activeKeys.includes(e.key)) return;
+
+      refreshSpatialTargets();
+      if (!focusableElements.length) return;
+
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+        applyFocusFeedback();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+        applyFocusFeedback();
+      } else if (e.key === "Enter") {
+        const target = focusableElements[currentFocusIndex];
+        if (target && document.activeElement !== target) {
+          e.preventDefault();
+          target.click();
         }
-      });
-    };
-
-    function loadYouTubeIframeApi() {
-      if (window.YT && window.YT.Player) {
-        window.onYouTubeIframeAPIReady();
-        return;
-      }
-      const tag = document.createElement("script");
-      tag.src = "https://youtube.com/iframe_api";
-      document.body.appendChild(tag);
-    }
-    loadYouTubeIframeApi();
-
-    function makeRoomId() {
-      return Math.random().toString(36).slice(2, 8).toUpperCase();
-    }
-
-    function userRoomPath(path = "") {
-      if (!currentUser) throw new Error("No clean pipeline instance auth context.");
-      return `users/${currentUser.uid}/rooms/${roomId}${path ? "/" + path : ""}`;
-    }
-
-    function roomRef(path = "") {
-      return ref(db, userRoomPath(path));
-    }
-
-    function setStatus(text) {
-      document.getElementById("statusText").textContent = text;
-    }
-
-    function updateEnableAudioButton() {
-      const btn = document.getElementById("enableAudioBtn");
-      if (!btn) return;
-
-      if (audioUnlocked) {
-        btn.textContent = "Enable Audio";
-        btn.className = "w-full rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 px-4 text-xs font-bold text-emerald-400 transition cursor-default";
-      } else {
-        btn.textContent = "Audio Enabled";
-        btn.className = "tv-focusable w-full rounded-xl bg-emerald-600 border border-emerald-500/40 py-2.5 px-4 text-xs font-bold text-white shadow-md cursor-pointer";
-      }
-    }
-
-    function markAudioUnlocked() {
-      audioUnlocked = true;
-      localStorage.setItem("nzmAudioUnlocked", "1");
-      updateEnableAudioButton();
-    }
-
-    function requestAudioUnlock() {
-      if (!playerReady || !player) {
-        setStatus("Waiting on player initialization framework...");
-        return;
-      }
-      try {
-        markAudioUnlocked();
-        player.unMute();
-        player.setVolume(85);
-
-        if (hasLoadedVideo && currentVideoId) {
-          player.playVideo();
-          setStatus("Audio Enabled, Karaoke Streaming.");
-        } else {
-          setStatus("Sound Active. Standby for remote input request.");
+      } else if (e.key === "Backspace" || e.key === "Escape") {
+        if (activeAppMode === "tube" && !document.getElementById("tubePlayerModal").classList.contains("hidden")) {
+          e.preventDefault();
+          document.getElementById("closeTubePlayer").click();
+        } else if (activeAppMode !== "selector") {
+          e.preventDefault();
+          switchAppMode("selector");
         }
-      } catch (error) {
-        console.warn(error);
-        setStatus("Handshake layer interface blocked.");
-      }
-    }
-
-    document.getElementById("enableAudioBtn").addEventListener("click", requestAudioUnlock);
-
-    const toggleQrBtn = document.getElementById("toggleQrBtn");
-    toggleQrBtn.addEventListener("click", () => {
-      isQrVisible = !isQrVisible;
-      const card = document.getElementById("qrCardWrapper");
-      if (isQrVisible) {
-        card.classList.remove("hidden");
-        toggleQrBtn.textContent = "Close QR Code";
-      } else {
-        card.classList.add("hidden");
-        toggleQrBtn.textContent = "Open QR Code";
       }
     });
 
-    function startPlaybackWithBestAudio() {
-      if (!playerReady || !player) return;
-      try {
-        if (audioUnlocked) {
-          player.unMute();
-        } else {
-          player.mute();
-        }
-        player.playVideo();
-        setStatus(audioUnlocked ? "Streaming Active" : "Streaming Muted (Awaiting Unmute Control)");
-      } catch (error) {
-        console.warn(error);
+    function switchAppMode(mode) {
+      activeAppMode = mode;
+      document.getElementById("selectorScreen").classList.add("hidden");
+      document.getElementById("videokeApp").classList.add("hidden");
+      document.getElementById("tubeApp").classList.add("hidden");
+
+      if (mode === "selector") {
+        document.getElementById("selectorScreen").classList.remove("hidden");
+      } else if (mode === "videoke") {
+        document.getElementById("videokeApp").classList.remove("hidden");
+        initVideokeRoom();
+      } else if (mode === "tube") {
+        document.getElementById("tubeApp").classList.remove("hidden");
+        fetchTubeFeed("trending music");
       }
+      setTimeout(refreshSpatialTargets, 150);
     }
 
-    function escapeHtml(value = "") {
-      return String(value).replace(/[&<>'"]/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-      }[c]));
-    }
+    // App Switcher Bindings
+    document.getElementById("chooseVideoke").onclick = () => switchAppMode("videoke");
+    document.getElementById("chooseTube").onclick = () => switchAppMode("tube");
+    document.getElementById("backToMenuFromV").onclick = () => switchAppMode("selector");
+    document.getElementById("backToMenuFromT").onclick = () => switchAppMode("selector");
 
-    function thumbnail(videoId) {
-      return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-    }
+    // AUTH ENGINE
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("loginScreen").classList.add("hidden");
+        switchAppMode("selector");
+      }
+    });
 
-    async function loginOrCreate() {
+    document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("emailInput").value.trim();
       const password = document.getElementById("passwordInput").value;
       const err = document.getElementById("loginError");
-      err.textContent = "";
-
-      if (!email || !password) {
-        err.textContent = "Parameters missing fields requirements.";
-        return;
-      }
+      if (!email || !password) return;
       try {
         await signInWithEmailAndPassword(auth, email, password);
-      } catch (loginError) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } catch (createError) {
-          err.textContent = createError.message;
+      } catch {
+        try { await createUserWithEmailAndPassword(auth, email, password); } catch (e) { err.textContent = e.message; }
+      }
+    };
+
+    // VIDEOKE MODULE (App 1 Engine)
+    window.onYouTubeIframeAPIReady = () => {
+      vPlayer = new YT.Player("player", {
+        width: "100%", height: "100%",
+        playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, enablejsapi: 1 },
+        events: {
+          onReady: () => { playerReady = true; setStatus("Ready framework active."); },
+          onStateChange: (ev) => { if (ev.data === YT.PlayerState.ENDED) playNextVideokeSong(); }
         }
-      }
-    }
-
-    document.getElementById("loginBtn").addEventListener("click", loginOrCreate);
-    document.getElementById("passwordInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") loginOrCreate();
-    });
-
-    document.getElementById("newRoomBtn").addEventListener("click", async () => {
-      roomId = makeRoomId();
-      localStorage.setItem("nzmRoom", roomId);
-      history.replaceState(null, "", `?room=${encodeURIComponent(roomId)}`);
-      processedCommands.clear();
-      if (currentUser) {
-        stopListeners();
-        await initRoom();
-      }
-    });
-
-    onAuthStateChanged(auth, async user => {
-      if (!user) return;
-      currentUser = user;
-      document.getElementById("loginScreen").style.display = "none";
-      localStorage.setItem("nzmRoom", roomId);
-      history.replaceState(null, "", `?room=${encodeURIComponent(roomId)}`);
-      await initRoom();
-    });
-
-    async function initRoom() {
-      await update(roomRef(), {
-        roomId,
-        ownerUid: currentUser.uid,
-        updatedAt: Date.now()
       });
-      renderQR();
-      listenQueue();
-      listenCommands();
-      focusFirstAvailableTvControl();
-      setStatus("Theater Ready. Connect Remote.");
-    }
+    };
 
-    function renderQR() {
-      const remoteUrl = `https://videokeremote.vercel.app/?room=${encodeURIComponent(roomId)}&owner=${encodeURIComponent(currentUser.uid)}`;
-      const roomCodeText = document.getElementById("roomCodeText");
-      if (roomCodeText) roomCodeText.textContent = roomId;
+    const tag = document.createElement("script");
+    tag.src = "https://youtube.com/iframe_api";
+    document.body.appendChild(tag);
 
+    function setStatus(txt) { document.getElementById("statusText").textContent = txt; }
+
+    async function initVideokeRoom() {
+      if (!currentUser) return;
+      document.getElementById("roomCodeText").textContent = roomId;
+      const rRef = ref(db, `users/${currentUser.uid}/rooms/${roomId}`);
+      await update(rRef, { roomId, ownerUid: currentUser.uid, updatedAt: Date.now() });
+      
+      // Realtime syncing
+      onValue(ref(db, `users/${currentUser.uid}/rooms/${roomId}/queue`), snap => {
+        const items = [];
+        snap.forEach(c => { items.push({ key: c.key, ...c.val() }); });
+        renderVideokeQueue(items.sort((a,b)=>a.createdAt - b.createdAt));
+      });
+
+      // Render Connection QR
       document.getElementById("qrCode").innerHTML = "";
       new QRCode(document.getElementById("qrCode"), {
-        text: remoteUrl,
-        width: 130,
-        height: 130,
-        correctLevel: QRCode.CorrectLevel.M
+        text: `https://videokeremote.vercel.app/?room=${roomId}&owner=${currentUser.uid}`,
+        width: 130, height: 130
       });
     }
 
-    function stopListeners() {
-      if (queueListenerRef) { off(queueListenerRef); queueListenerRef = null; }
-      if (commandsListenerRef) { off(commandsListenerRef); commandsListenerRef = null; }
-    }
+    document.getElementById("toggleQrBtn").onclick = () => {
+      document.getElementById("qrCardWrapper").classList.toggle("hidden");
+    };
 
-    function listenQueue() {
-      queueListenerRef = roomRef("queue");
-      onValue(queueListenerRef, snapshot => {
-        const items = [];
-        snapshot.forEach(child => {
-          items.push({ key: child.key, ...child.val() });
-        });
-        items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-        renderQueue(items);
-      });
-    }
+    document.getElementById("enableAudioBtn").onclick = () => {
+      if (!vPlayer || !playerReady) return;
+      audioUnlocked = true; localStorage.setItem("nzmAudioUnlocked", "1");
+      vPlayer.unMute(); vPlayer.setVolume(85);
+      setStatus("Audio Channels Primed.");
+    };
 
-    function getTvFocusableElements() {
-      return [...document.querySelectorAll("[data-tv-focusable='true']")]
-        .filter(el => !el.disabled && el.offsetParent !== null && el.style.display !== "none");
-    }
-
-    function syncTvFocusClass() {
-      document.querySelectorAll(".tv-focused").forEach(el => el.classList.remove("tv-focused"));
-      const active = document.activeElement;
-      if (active && active.matches && active.matches("[data-tv-focusable='true']")) {
-        active.classList.add("tv-focused");
-      }
-    }
-
-    function focusTvElement(index = 0) {
-      const focusables = getTvFocusableElements();
-      if (!focusables.length) return;
-      sidePanelFocusIndex = Math.max(0, Math.min(index, focusables.length - 1));
-      const target = focusables[sidePanelFocusIndex];
-      target.focus({ preventScroll: true });
-      target.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      syncTvFocusClass();
-    }
-
-    function moveSidePanelFocus(direction) {
-      const focusables = getTvFocusableElements();
-      if (!focusables.length) return;
-      const activeIndex = focusables.indexOf(document.activeElement);
-      const startIndex = activeIndex >= 0 ? activeIndex : sidePanelFocusIndex;
-      const nextIndex = Math.max(0, Math.min(startIndex + direction, focusables.length - 1));
-      focusTvElement(nextIndex);
-    }
-
-    function focusFirstAvailableTvControl() {
-      requestAnimationFrame(() => {
-        const preferred = document.getElementById("enableAudioBtn");
-        if (preferred && preferred.offsetParent !== null && preferred.style.display !== "none") {
-          preferred.focus({ preventScroll: true });
-          syncTvFocusClass();
-          return;
-        }
-        focusTvElement(0);
-      });
-    }
-
-    function renderQueue(items) {
-      tvQueueItems = items;
-      selectedQueueIndex = Math.min(selectedQueueIndex, Math.max(items.length - 1, 0));
-      document.getElementById("queueCount").textContent = items.length;
-      const tbody = document.getElementById("queueTableBody");
-
-      if (!items.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="3" class="py-12 text-center text-xs font-medium text-zinc-600">No songs currently lined up</td>
-          </tr>`;
-        return;
-      }
-
-      tbody.innerHTML = items.map((item, index) => `
-        <tr
-          class="queue-row-item tv-focusable border-b border-zinc-900/60 bg-zinc-900/10 hover:bg-zinc-900/30 transition duration-150 rounded-lg cursor-pointer ${index === selectedQueueIndex ? "is-selected" : ""}"
-          tabindex="0"
-          role="button"
-          data-tv-focusable="true"
-          data-queue-index="${index}"
-        >
-          <td class="py-3 pl-3 font-black text-xs text-amber-500/70">#${String(index + 1).padStart(2, '0')}</td>
-          <td class="py-2 text-center">
-            <img class="h-8 w-12 mx-auto rounded object-cover border border-zinc-800 shadow-sm" src="${item.thumbnail || thumbnail(item.videoId)}" />
-          </td>
-          <td class="py-2 pl-3 pr-2 min-w-0">
-            <div class="truncate text-xs font-bold text-zinc-100 tracking-tight">${escapeHtml(item.title || item.videoId)}</div>
-            <div class="truncate text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">${escapeHtml(item.singer || "Guest Singer")}</div>
-          </td>
+    function renderVideokeQueue(items) {
+      const body = document.getElementById("queueTableBody");
+      body.innerHTML = items.length ? items.map((item, idx) => `
+        <tr class="tv-focusable border-b border-zinc-900 bg-zinc-900/20" tabindex="0" data-tv-focusable="true" onclick="playVideokeTrack('${item.videoId}', '${item.title}', '${item.key}')">
+          <td class="p-3 text-xs text-amber-500 font-bold">#${idx+1}</td>
+          <td class="p-2"><div class="text-xs font-bold truncate max-w-[180px]">${item.title}</div></td>
         </tr>
-      `).join("");
-
-      document.querySelectorAll(".queue-row-item").forEach(row => {
-        row.addEventListener("focus", () => {
-          selectedQueueIndex = Number(row.dataset.queueIndex || 0);
-          syncTvFocusClass();
-        });
-        row.addEventListener("blur", syncTvFocusClass);
-        row.addEventListener("click", async () => {
-          selectedQueueIndex = Number(row.dataset.queueIndex || 0);
-          await playSelectedQueueSong();
-        });
-      });
-      syncTvFocusClass();
+      `).join("") : '<tr><td class="text-center py-6 text-xs text-zinc-600">Queue is completely empty</td></tr>';
+      document.getElementById("queueCount").textContent = items.length;
+      refreshSpatialTargets();
     }
 
-    async function playSelectedQueueSong() {
-      const item = tvQueueItems[selectedQueueIndex];
-      if (!item) return;
-      await playSpecificSong(item, item.key);
-    }
-
-    async function removeSelectedQueueSong() {
-      const item = tvQueueItems[selectedQueueIndex];
-      if (!item || !item.key) return;
-      await remove(roomRef(`queue/${item.key}`));
-      selectedQueueIndex = Math.max(0, selectedQueueIndex - 1);
-      setStatus("Dropped targeted item request.");
-    }
-
-    function handleTvQueueKeys(event) {
-      const key = event.key;
-      const remoteOkKeys = ["Enter", " ", "Spacebar", "OK", "Select"];
-      const remoteBackKeys = ["Backspace", "Delete", "BrowserBack", "Escape"];
-
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", ...remoteOkKeys, ...remoteBackKeys].includes(key)) return;
-
-      const active = document.activeElement;
-      const activeIsQueueRow = active && active.classList && active.classList.contains("queue-row-item");
-
-      if (key === "ArrowUp") {
-        event.preventDefault();
-        moveSidePanelFocus(-1);
-        return;
-      }
-      if (key === "ArrowDown") {
-        event.preventDefault();
-        moveSidePanelFocus(1);
-        return;
-      }
-      if (key === "ArrowLeft" || key === "ArrowRight") {
-        event.preventDefault();
-        return;
-      }
-      if (remoteOkKeys.includes(key)) {
-        if (!active) return;
-        event.preventDefault();
-        if (activeIsQueueRow) {
-          selectedQueueIndex = Number(active.dataset.queueIndex || 0);
-          playSelectedQueueSong();
-          return;
-        }
-        active.click();
-        return;
-      }
-      if (remoteBackKeys.includes(key)) {
-        if (!activeIsQueueRow) return;
-        event.preventDefault();
-        removeSelectedQueueSong();
-      }
-    }
-
-    document.addEventListener("keydown", handleTvQueueKeys);
-    document.addEventListener("focusin", syncTvFocusClass);
-    document.addEventListener("focusout", syncTvFocusClass);
-
-    function listenCommands() {
-      commandsListenerRef = roomRef("commands");
-      onChildAdded(commandsListenerRef, async snapshot => {
-        if (processedCommands.has(snapshot.key)) return;
-        processedCommands.add(snapshot.key);
-
-        const cmd = snapshot.val();
-        if (!cmd || !cmd.type) return;
-
-        if (cmd.type === "play") { await handleRemotePlay(); return; }
-        if (cmd.type === "pause") { pauseCurrentSong(); return; }
-        if (cmd.type === "next") { await playNextSong(); return; }
-        if (cmd.type === "replay") { replayCurrentSong(); return; }
-        if (cmd.type === "volume") { setVolumeFromRemote(cmd.value); return; }
-        if (cmd.type === "playVideo" && cmd.videoId) { await playSpecificSong(cmd, null); return; }
-      });
-    }
-
-    async function handleRemotePlay() {
+    async function playVideokeTrack(vId, title, key) {
       if (!playerReady) return;
-      if (hasLoadedVideo && currentVideoId) {
-        forcePlayCurrentVideo();
-        return;
+      document.getElementById("playerPlaceholder").style.display = "none";
+      document.getElementById("nowPlaying").textContent = title;
+      vPlayer.loadVideoById(vId);
+      if (key) await remove(ref(db, `users/${currentUser.uid}/rooms/${roomId}/queue/${key}`));
+    }
+
+    async function playNextVideokeSong() {
+      const snap = await get(ref(db, `users/${currentUser.uid}/rooms/${roomId}/queue`));
+      if (snap.exists()) {
+        const items = []; snap.forEach(c => { items.push({ key: c.key, ...c.val() }); });
+        const next = items.sort((a,b)=>a.createdAt - b.createdAt)[0];
+        playVideokeTrack(next.videoId, next.title, next.key);
       }
-      await playNextSong();
     }
 
-    function forcePlayCurrentVideo() {
-      if (!playerReady || !player) return;
-      startPlaybackWithBestAudio();
-    }
+    // TUBE CONTENT MODULE (App 2 Engine)
+    const filterChips = ["Trending", "Karaoke Hits", "HipHop Mixes", "Acoustic Live", "Pinoy Rock", "Gaming Stream"];
+    const chipsWrapper = document.getElementById("tubeChips");
+    chipsWrapper.innerHTML = filterChips.map(c => `<button class="tv-focusable chip bg-zinc-900 text-xs px-4 py-2 rounded-full border border-zinc-800 shrink-0 font-bold" data-tv-focusable="true" onclick="fetchTubeFeed('${c}')">${c}</button>`).join("");
 
-    function pauseCurrentSong() {
-      if (!playerReady || !player || !hasLoadedVideo) return;
-      try { player.pauseVideo(); setStatus("Paused"); } catch (error) { console.warn(error); }
-    }
-
-    function replayCurrentSong() {
-      if (!playerReady || !player || !hasLoadedVideo) return;
-      try { player.seekTo(0, true); forcePlayCurrentVideo(); setStatus("Replay Core Track"); } catch (error) { console.warn(error); }
-    }
-
-    function setVolumeFromRemote(value) {
-      if (!playerReady || !player) return;
-      const volume = Math.max(0, Math.min(100, Number(value || 80)));
-      try { player.setVolume(volume); setStatus(`Volume Master ${volume}%`); } catch (error) { console.warn(error); }
-    }
-
-    async function playNextSong() {
-      const snap = await get(roomRef("queue"));
-      const items = [];
-      snap.forEach(child => { items.push({ key: child.key, ...child.val() }); });
-      items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-      if (!items.length) {
-        setStatus("Queue Exhausted");
-        return;
+    async function fetchTubeFeed(q) {
+      document.getElementById("tubeGrid").innerHTML = Array.from({length: 8}).map(()=>`<div class="skeleton-card"><div class="skeleton-thumb rounded-xl"></div></div>`).join('');
+      try {
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=20&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`);
+        const data = await res.json();
+        tubeVideos = data.items || [];
+        renderTubeGrid(tubeVideos);
+      } catch {
+        document.getElementById("tubeGrid").innerHTML = '<p class="text-center text-xs text-zinc-500">Error communication payload.</p>';
       }
-      await playSpecificSong(items[0], items[0].key);
     }
 
-    async function playSpecificSong(song, queueKey = null) {
-      if (!song || !song.videoId) return;
-      hasLoadedVideo = true;
-      currentVideoId = song.videoId;
+    function renderTubeGrid(videos) {
+      const grid = document.getElementById("tubeGrid");
+      document.getElementById("tubeEmpty").classList.add("hidden");
+      if (!videos.length) { document.getElementById("tubeEmpty").classList.remove("hidden"); grid.innerHTML = ""; return; }
 
-      const placeholder = document.getElementById("playerPlaceholder");
-      if (placeholder) placeholder.style.display = "none";
-
-      document.getElementById("nowPlaying").textContent = song.title || song.videoId;
-      setStatus("Buffering Layer Video Stream...");
-
-      if (playerReady && player) {
-        try {
-          if (audioUnlocked) { player.unMute(); } else { player.mute(); }
-          player.loadVideoById({ videoId: song.videoId, startSeconds: 0 });
-        } catch (error) {
-          console.warn(error);
-        }
-        setTimeout(startPlaybackWithBestAudio, 250);
-        setTimeout(startPlaybackWithBestAudio, 1000);
-      }
-      await set(roomRef("nowPlaying"), { ...song, startedAt: Date.now() });
-      if (queueKey) { await remove(roomRef(`queue/${queueKey}`)); }
+      grid.innerHTML = videos.map((v, i) => `
+        <div class="tv-focusable cursor-pointer rounded-xl overflow-hidden bg-zinc-900/40 border border-zinc-900 transition" data-tv-focusable="true" onclick="launchTubePlayer(${i})">
+          <div class="thumbnail"><img src="${v.snippet.thumbnails.medium?.url}"/></div>
+          <div class="p-3"><p class="text-xs font-bold line-clamp-2 leading-tight">${v.snippet.title}</p><p class="text-[10px] text-zinc-500 mt-1">${v.snippet.channelTitle}</p></div>
+        </div>
+      `).join("");
+      refreshSpatialTargets();
     }
+
+    document.getElementById("tubeSearchBtn").onclick = () => {
+      const q = document.getElementById("tubeSearchInput").value.trim();
+      if (q) fetchTubeFeed(q);
+    };
+
+    window.launchTubePlayer = (index) => {
+      const targetVideo = tubeVideos[index];
+      if (!targetVideo) return;
+      document.getElementById("tubePlayerModal").classList.remove("hidden");
+      document.getElementById("tubeFrame").src = `https://www.youtube.com/embed/${targetVideo.id.videoId}?autoplay=1&rel=0&playsinline=1`;
+      document.getElementById("tubeWatchTitle").textContent = targetVideo.snippet.title;
+      document.getElementById("tubeWatchMeta").textContent = targetVideo.snippet.channelTitle;
+
+      // Render Context Mix Items inside side drawer
+      const nextMix = tubeVideos.filter((_, i) => i !== index).slice(0, 5);
+      document.getElementById("tubeNextQueue").innerHTML = nextMix.map((v) => `
+        <div class="flex gap-2 items-center bg-zinc-900/60 p-2 rounded-lg border border-zinc-900">
+          <img class="w-20 aspect-video object-cover rounded" src="${v.snippet.thumbnails.default?.url}"/>
+          <p class="text-[11px] font-bold truncate">${v.snippet.title}</p>
+        </div>
+      `).join("");
+      
+      refreshSpatialTargets();
+    };
+
+    document.getElementById("closeTubePlayer").onclick = () => {
+      document.getElementById("tubeFrame").src = "";
+      document.getElementById("tubePlayerModal").classList.add("hidden");
+      refreshSpatialTargets();
+    };
+
+    // Initial Kickstart
+    refreshSpatialTargets();
   </script>
 </body>
 </html>
